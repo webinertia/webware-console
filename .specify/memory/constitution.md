@@ -1,50 +1,47 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+==================
+Version change: (none) → 1.0.0 (initial ratification)
+Modified principles: none (initial)
+Added sections: Core Principles (5), Dependencies & Compatibility, Development Workflow, Governance
+Removed sections: none
+Follow-up TODOs: none
+-->
+
+# Webware Console Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Library-First
+Every capability ships as a self-contained, independently testable library component. Components MUST have a clear, singular purpose; organizational-only or kitchen-sink packages are prohibited.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. TUI-First
+The package provides a text user interface — a menu and better help — for CLI commands. It presents and invokes commands; it does not reimplement command logic that belongs to other components.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Consumer-Agnostic
+Commands are discovered and surfaced from Webware components and Mezzio at runtime; the package MUST NOT hard-couple to a specific application. Long-term it wraps mezzio-tooling rather than replacing it.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Webware Quality Gates (NON-NEGOTIABLE)
+Every change MUST pass the shared webware gates: Mago format, lint, analyze, and guard with no silent suppression; PHPUnit 13 strict mode (coverage metadata, mock/stub split, `failOnNotice`/`failOnDeprecation`/`failOnWarning`); and Infection mutation coverage at or above the configured thresholds. Test doubles follow PHPUnit 13 rules — `createStub()` for value doubles, `createMock()` only with `expects()`.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Naming & Compatibility
+Class and interface names MUST NOT add redundant descriptive prefixes that repeat the enclosing namespace. Interface names end in `Interface`; trait names end in `Trait`. Support only current supported PHP versions (`~8.4.1 || ~8.5.0`). The namespace root is `Webware\Console\`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Dependencies & Compatibility
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- The TUI stack (e.g. Symfony Console, terminal/ANSI libraries) is decided during spec/plan, never pinned prematurely in the constitution.
+- `webware/webware-tools` is a development-only dependency supplying the shared Mago configuration and CI conventions.
+- VCS repository entries appear only for pre-release dev dependencies and are removed once the dependency is tagged on Packagist.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Spec-driven development: each step (constitution, specify, plan, tasks, implement, converge) lands as its own branch and squash-merged pull request.
+- Commits use Conventional Commits and carry the maintainer's real identity (`Joey Smith <jsmith@webinertia.net>`).
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- This constitution supersedes other practices; conflicts are resolved in its favor or the constitution is amended via pull request.
+- Amendments require a pull request that updates the version and Last Amended date.
+- Every pull request is reviewed for compliance with the Core Principles.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-08-28 | **Last Amended**: 2026-08-28
