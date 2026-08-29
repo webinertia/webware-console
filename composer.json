@@ -1,0 +1,38 @@
+{
+    "name": "webware/webware-console",
+    "description": "Webware Console — TUI application providing a menu and better help for Webware and Mezzio CLI commands",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "webware",
+        "console",
+        "tui",
+        "mezzio",
+        "cli"
+    ],
+    "authors": [
+        {
+            "name": "Joey Smith",
+            "email": "jsmith@webinertia.net",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "~8.4.1 || ~8.5.0"
+    },
+    "require-dev": {
+        "webware/webware-tools": "^0.1.x-dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webware\\Console\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.4.99"
+        }
+    }
+}
