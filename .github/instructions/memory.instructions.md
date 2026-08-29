@@ -47,3 +47,4 @@ Tagline: Full spec-kit scaffold + constitution/spec/plan all MERGED. Next: `/spe
 1. `/speckit-tasks` for `001-console-tui` (branch + PR).
 2. `/speckit-implement` ⇄ `/speckit-converge`.
 3. CI/alignment with webware-tools — later step.
+4. Queued 2026-08-29: strip the "no redundant namespace prefix" clause from Principle V here, in webware-migration, and in the webware-tools `webware-alignment` preset constitution template.
