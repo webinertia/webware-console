@@ -85,7 +85,7 @@ src/
 └── ConfigProvider.php               # DI wiring
 
 bin/
-└── console                          # Symfony Application + menu launch entry
+└── webware                         # Symfony Application + menu launch entry
 
 config/                              # ConfigAggregator + ServiceManager skeleton (moved from webware-migration)
 ├── autoload/
