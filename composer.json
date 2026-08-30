@@ -44,6 +44,7 @@
         "menu": "php bin/console menu",
         "mutation-test": "infection",
         "test": "phpunit --testsuite unit",
+        "test-coverage": "phpunit --coverage-clover clover.xml",
         "test-all": [
             "@test",
             "@test-integration"
