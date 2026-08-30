@@ -5,7 +5,7 @@ applyTo: '**/*'
 
 # Webware Console Memory
 
-Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery, stays migration-agnostic. Spec-kit scaffold + constitution/spec/plan/tasks MERGED; implementation in progress (loader + Application + menu US1 built). Discovery via `ConsoleInterface::class` key → `ContainerCommandLoader` (lazy).
+Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery, stays migration-agnostic. Spec-kit scaffold + constitution/spec/plan/tasks MERGED; US1–US4 + polish T001–T026 DONE (100% line + mutation coverage). Discovery via `ConsoleInterface::class` key → `ContainerCommandLoader` (lazy).
 
 ## Component
 
@@ -102,6 +102,23 @@ Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery,
 - PHPUnit 13: `#[CoversClass]` + `#[CoversMethod]` per class, `createStub()` for value doubles,
   `createMock()` only with `expects()`, `static::assert*`.
 
+## Prompt key dispatch (added 2026-08-30)
+
+- `src/Prompt/PromptKey.php` — `enum PromptKey: string` of control keys the prompt dispatches on
+  (`escape`, `tab`, `down`, `up`, `enter`, `left`, `right`, `backspace`, `space`).
+- `CommandInputPrompter::onKey()` dispatches via `match (PromptKey::tryFrom($event->name))`;
+  `null` falls to `PromptKeyAction::character()`. `src/Prompt/PromptKeyAction.php` holds the
+  extracted per-key helpers (kept `CommandInputPrompter` under mago's `too-many-methods`).
+- `PromptKeyAction` private-ish helpers are tested through the public `onKey()`/render paths, not directly.
+
+## Infection ignore config (`infection.json5.dist`)
+
+- 8 equivalent mutants are ignored via per-mutator `ignore` patterns keyed by `Class::method::line`:
+  7 guard `ReturnRemoval`s (confirm `::158/165/172`, runMenu `::123/129/135/145` — fall-through is a
+  no-op for the matched key) and 1 `Minus` (input-area width, `render::83`).
+- Everything else is killed by tests — no blanket mutator disables, no `@infection-ignore-all`.
+- Run locally as `composer mutation-test` (infection auto-enables xdebug coverage).
+
 ## Cross-component — webware-migration relationship
 
 - webware-migration is a pure library PLUS its own Symfony commands in `Webware\Migration\Console\`.
@@ -112,10 +129,11 @@ Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery,
 
 ## Next actions
 
-1. Continue `/speckit-implement` ⇄ `/speckit-converge`: US2 (help), US3 (run + prompter),
-   US4 (ConfigProvider command registration + integration test), then polish (T023–T028).
-2. Done so far: Phase 1 setup + Phase 2 (`ConsoleInterface`, `CommandLoaderFactory`,
-   `ApplicationFactory`, `MenuCommand`, `Menu`/`MenuRenderer` via `Widget\Menu`) + US1 (T001–T014).
+1. Remaining polish: T027 (README badges + usage) and T028 (`quickstart.md` end-to-end validation).
+2. Done so far (all merged-ready on `refactor/prompt-key-dispatch`): Phase 1–2, US1–US4,
+   and polish T023–T026. Quality Gate IV is met — 100% line coverage (373/373) and
+   100% mutation coverage (MSI 100: 252 generated, 249 killed, 3 static-analysis, 0 escaped,
+   8 ignored equivalent mutants).
 3. CI/alignment with webware-tools — later step.
 4. Queued 2026-08-29: strip the "no redundant namespace prefix" clause from Principle V in
    webware-migration and the webware-tools `webware-alignment` preset constitution template.

@@ -109,8 +109,8 @@
 
 - [X] T023 [P] Add empty-command-set handling coverage (FR-007) and duplicate-name surfacing (FR-006)
 - [X] T024 [P] Run `mago format`/`lint`/`analyze`/`guard` and fix findings at source
-- [ ] T025 Run `composer test` + `composer test-integration` and close coverage gaps to 100% line + mutation
-- [ ] T026 Add the reusable-workflow wrapper `.github/workflows/continuous-integration.yml` + `codecov.yml` + `infection.json5.dist` + `renovate.json`
+- [X] T025 Run `composer test` + `composer test-integration` and close coverage gaps to 100% line + mutation
+- [X] T026 Add the reusable-workflow wrapper `.github/workflows/continuous-integration.yml` + `codecov.yml` + `infection.json5.dist` + `renovate.json`
 - [ ] T027 [P] Update `README.md` with badges and usage
 - [ ] T028 Run `quickstart.md` validation end-to-end
 
