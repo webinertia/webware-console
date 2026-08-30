@@ -2,6 +2,9 @@
     "name": "webware/webware-console",
     "description": "Webware Console — TUI application providing a menu and better help for Webware and Mezzio CLI commands",
     "license": "BSD-3-Clause",
+    "bin": [
+        "bin/webware"
+    ],
     "keywords": [
         "webware",
         "console",
@@ -40,8 +43,9 @@
         }
     },
     "scripts": {
-        "console": "php bin/console",
-        "menu": "php bin/console menu",
+        "console": "php bin/webware",
+        "console-menu": "php bin/webware menu",
+        "menu": "php bin/webware menu",
         "mutation-test": "infection",
         "test": "phpunit --testsuite unit",
         "test-coverage": "phpunit --coverage-clover clover.xml",

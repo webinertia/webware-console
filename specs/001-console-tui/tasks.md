@@ -30,7 +30,7 @@
 - [X] T006 [P] Symfony `Command` classes are the contract — no adapter; resolved lazily by the loader (superseded the planned adapter)
 - [X] T007 [P] Unit test `CommandLoaderFactory` (merge, duplicate detection, lazy resolution) in `test/unit/Container/`
 - [X] T008 [P] Adapt the moved `config/` + `data/` skeleton to `Webware\Console\` — replace the placeholder `App\ConfigProvider` and remove phpdb providers; wire ConfigAggregator + ServiceManager bootstrap
-- [X] T009 Wire the Symfony `Application` + `bin/console` entry (shebang, executable) over the config/container bootstrap
+- [X] T009 Wire the Symfony `Application` + `bin/webware` entry (shebang, executable) over the config/container bootstrap
 
 **Checkpoint**: discovery seam + runtime skeleton ready; no story blocked.
 
@@ -49,7 +49,7 @@
 
 - [X] T012 [P] [US1] Implement `Menu` in `src/Menu/Menu.php` — keyboard navigation state (up/down/quit) over the command names
 - [X] T013 [P] [US1] Implement `MenuRenderer` in `src/Menu/MenuRenderer.php` — render the menu with `Psl\Terminal`/`Psl\Ansi`; render a graceful empty state when no commands are available (FR-007)
-- [X] T014 [US1] Wire the `menu` command (`MenuCommand`) into the Application via `ApplicationFactory`; `bin/console` resolves the Application from the container and runs it
+- [X] T014 [US1] Wire the `menu` command (`MenuCommand`) into the Application via `ApplicationFactory`; `bin/webware` resolves the Application from the container and runs it
 
 **Checkpoint**: US1 independently functional — menu lists and navigates commands.
 
