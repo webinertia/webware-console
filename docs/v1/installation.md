@@ -5,30 +5,20 @@
 - PHP 8.4.1+ (`~8.4.1 || ~8.5.0`)
 - Composer
 
-## Install
+## Consumer applications
 
-The package is published as `webware/webware-console`. Until the first stable
-tag, install the dev branch through a VCS repository entry:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/webinertia/webware-console"
-        }
-    ],
-    "require": {
-        "webware/webware-console": "0.1.x-dev"
-    },
-    "minimum-stability": "dev"
-}
-```
-
-Then run:
+Install from within the consuming application:
 
 ```bash
-composer update
+composer require --dev webware/webware-console
+```
+
+## Development
+
+When working on this package directly:
+
+```bash
+composer install
 ```
 
 ## Entry point
