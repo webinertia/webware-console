@@ -21,11 +21,13 @@ components register. It does not reimplement command logic.
 
 ## Documentation
 
-- [Installation](installation.md)
-- [Quickstart](quickstart.md)
-- [Command discovery](command-discovery.md)
-- [Configuration](configuration.md)
-- [Development](development.md)
+Versioned documentation lives under [`docs/`](docs/):
+
+- [Installation](docs/v1/installation.md)
+- [Quickstart](docs/v1/quickstart.md)
+- [Command discovery](docs/v1/command-discovery.md)
+- [Configuration](docs/v1/configuration.md)
+- [Development](docs/v1/development.md)
 
 ## Requirements
 
