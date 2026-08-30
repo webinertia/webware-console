@@ -17,9 +17,15 @@
         }
     ],
     "require": {
-        "php": "~8.4.1 || ~8.5.0"
+        "laminas/laminas-config-aggregator": "^1.20",
+        "laminas/laminas-servicemanager": "^4.5",
+        "php": "~8.4.1 || ~8.5.0",
+        "php-standard-library/terminal": "^6.2",
+        "symfony/console": "^7.4 || ^8.0"
     },
     "require-dev": {
+        "infection/infection": "^0.35",
+        "phpunit/phpunit": "^13.3",
         "webware/webware-tools": "^0.1.x-dev"
     },
     "autoload": {
@@ -27,10 +33,31 @@
             "Webware\\Console\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Webware\\Console\\Test\\Integration\\": "test/integration/",
+            "Webware\\Console\\Test\\Unit\\": "test/unit/"
+        }
+    },
+    "scripts": {
+        "console": "php bin/console",
+        "menu": "php bin/console menu",
+        "mutation-test": "infection",
+        "test": "phpunit --testsuite unit",
+        "test-coverage": "phpunit --coverage-clover clover.xml",
+        "test-all": [
+            "@test",
+            "@test-integration"
+        ],
+        "test-integration": "phpunit --testsuite integration"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true
+        },
         "platform": {
             "php": "8.4.99"
         }

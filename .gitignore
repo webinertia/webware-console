@@ -1,1 +1,9 @@
 /vendor/
+/.phpunit.cache/
+/.phpunit.result.cache
+/clover.xml
+/infection.json5
+/infection.log
+/summary.log
+/data/cache/*
+!/data/cache/.gitkeep

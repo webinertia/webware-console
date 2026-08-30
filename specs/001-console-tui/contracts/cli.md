@@ -9,7 +9,8 @@ The console's own interface.
 ## Keys
 
 - Up/down: move selection.
-- Enter: run the selected command (or open its help).
+- Enter: run the selected command.
+- Help key: show the focused command's help.
 - Type: filter/search commands.
 - Quit key: exit the console.
 

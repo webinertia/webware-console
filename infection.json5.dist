@@ -1,0 +1,43 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "timeout": 10,
+    "threads": "max",
+    "logs": {
+        "text": "infection.log",
+        "summary": "summary.log",
+        "stryker": {
+            // matches versioned release branches, e.g. "0.1.x", "0.2.x"
+            "badge": "/^\\d+\\.\\d+\\.x$/"
+        }
+    },
+    "mutators": {
+        "@default": true,
+        "ReturnRemoval": {
+            "ignore": [
+                // confirm() onKey guard returns: removing them falls through to
+                // mutually-exclusive checks that no-op for the matched key.
+                "Webware\\Console\\Prompt\\CommandInputPrompter::confirm::158",
+                "Webware\\Console\\Prompt\\CommandInputPrompter::confirm::165",
+                "Webware\\Console\\Prompt\\CommandInputPrompter::confirm::172",
+                // runMenu() onKey guard returns: same no-op fall-through.
+                "Webware\\Console\\Menu\\MenuCommand::runMenu::123",
+                "Webware\\Console\\Menu\\MenuCommand::runMenu::129",
+                "Webware\\Console\\Menu\\MenuCommand::runMenu::135",
+                "Webware\\Console\\Menu\\MenuCommand::runMenu::145"
+            ]
+        },
+        "Minus": {
+            "ignore": [
+                // Input-area width; TextInput only diverges for values wider than
+                // the area, which is not a behavior the prompt needs to guard.
+                "Webware\\Console\\Prompt\\CommandInputPrompter::render::83"
+            ]
+        }
+    },
+    "staticAnalysisTool": "mago"
+}
