@@ -23,13 +23,39 @@ final class FakeConsole implements ConsoleInterface
 
     public int $stopCount = 0;
 
+    public int $runCount = 0;
+
+    private ?Frame $lastFrame = null;
+
+    /** @var list<Frame> */
+    private array $frames = [];
+
+    /**
+     * @return list<Frame> Every frame rendered, in order.
+     */
+    public function frames(): array
+    {
+        return $this->frames;
+    }
+
+    public function lastFrame(): Frame
+    {
+        return $this->lastFrame ?? $this->frame();
+    }
+
     public function run(string $title, object $state, Closure $onKey, Closure $render): void
     {
+        $this->runCount++;
+
         foreach (array_shift($this->scripts) ?? [] as $event) {
             $onKey($event, $state);
         }
 
-        $render($this->frame(), $state);
+        $this->lastFrame = $this->frame();
+
+        $this->frames[] = $this->lastFrame;
+
+        $render($this->lastFrame, $state);
     }
 
     public function stop(): void

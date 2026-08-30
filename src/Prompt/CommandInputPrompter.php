@@ -19,7 +19,6 @@ use Webware\Console\ConsoleInterface;
 use function array_key_exists;
 use function count;
 use function explode;
-use function mb_substr;
 use function sprintf;
 
 /**
@@ -28,92 +27,34 @@ use function sprintf;
  *
  * @internal
  */
-// @mago-expect lint:cyclomatic-complexity,kan-defect — a TUI key dispatcher is inherently branchy.
+// @mago-expect lint:cyclomatic-complexity,kan-defect — a TUI prompt is inherently branchy.
 final readonly class CommandInputPrompter
 {
+    private const int INPUT_ROW_HEIGHT = 1;
+
     public function __construct(
         private ConsoleInterface $console,
     ) {}
 
     public static function onKey(Event\Key $event, PromptState $state): void
     {
-        $count = count($state->fields);
         $field = $state->fields[$state->activeIndex] ?? null;
 
         if (null === $field) {
             return;
         }
 
-        if ($event->is(key: 'escape')) {
-            $state->cancelled = true;
-
-            return;
-        }
-
-        if ($event->is(key: 'tab') || $event->is(key: 'down')) {
-            $state->activeIndex++;
-
-            return;
-        }
-
-        if ($event->is(key: 'up')) {
-            $state->activeIndex--;
-
-            return;
-        }
-
-        if (FieldKind::Flag === $field->kind && ' ' === $event->char) {
-            $field->flagValue = ! $field->flagValue;
-
-            return;
-        }
-
-        if ($event->is(key: 'enter')) {
-            if ($state->activeIndex === ($count - 1)) {
-                $state->submitted = true;
-
-                return;
-            }
-
-            $state->activeIndex++;
-
-            return;
-        }
-
-        if (FieldKind::Flag === $field->kind) {
-            return;
-        }
-
-        if ($event->is(key: 'left')) {
-            $field->cursor--;
-
-            return;
-        }
-
-        if ($event->is(key: 'right')) {
-            $field->cursor++;
-
-            return;
-        }
-
-        if ($event->is(key: 'backspace')) {
-            if (0 < $field->cursor) {
-                $field->value =
-                    mb_substr($field->value, start: 0, length: $field->cursor - 1)
-                    . mb_substr($field->value, start: $field->cursor);
-                $field->cursor--;
-            }
-
-            return;
-        }
-
-        if (null !== $event->char) {
-            $field->value =
-                mb_substr($field->value, start: 0, length: $field->cursor)
-                . $event->char
-                . mb_substr($field->value, start: $field->cursor);
-            $field->cursor++;
-        }
+        match (PromptKey::tryFrom($event->name)) {
+            PromptKey::Escape               => $state->cancelled = true,
+            PromptKey::Tab, PromptKey::Down => $state->activeIndex++,
+            PromptKey::Up                   => $state->activeIndex--,
+            PromptKey::Enter                => PromptKeyAction::enter($state),
+            PromptKey::Left                 => PromptKeyAction::left($field),
+            PromptKey::Right                => PromptKeyAction::right($field),
+            PromptKey::Backspace            => PromptKeyAction::backspace($field),
+            PromptKey::Space                => PromptKeyAction::toggleFlag($field),
+            null                            => PromptKeyAction::character($event, $field),
+        };
     }
 
     public static function render(Frame $frame, PromptState $state): void
@@ -136,7 +77,12 @@ final readonly class CommandInputPrompter
                 style: $style,
             );
 
-            $inputArea = new Rect($area->x + Str\length($prefix), $y, $area->width - Str\length($prefix), 1);
+            $inputArea = new Rect(
+                $area->x + Str\length($prefix),
+                $y,
+                $area->width - Str\length($prefix),
+                self::INPUT_ROW_HEIGHT,
+            );
 
             if (FieldKind::Flag === $field->kind) {
                 $buffer->setString(
