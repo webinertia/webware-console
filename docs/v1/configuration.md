@@ -17,7 +17,7 @@ config/
 data/
   cache/                            # config cache output
 bin/
-  console                           # entry point: build container, run Application
+  webware                          # entry point: build container, run Application
 ```
 
 ## Providers

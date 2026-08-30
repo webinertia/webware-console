@@ -29,10 +29,10 @@ The simplest way in is a Composer alias that opens the menu:
 composer console-menu    # or: composer menu
 ```
 
-Both aliases run the bundled `bin/console` entry point. Invoke it directly when
+Both aliases run the bundled `bin/webware` entry point. Invoke it directly when
 needed:
 
 ```bash
-php bin/console          # run the Application
-php bin/console menu     # open the menu directly
+php bin/webware          # run the Application
+php bin/webware menu     # open the menu directly
 ```

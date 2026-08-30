@@ -19,13 +19,13 @@
 3. Alternatively, launch the raw Application:
 
    ```bash
-   php bin/console
+   php bin/webware
    ```
 
    or the menu directly:
 
    ```bash
-   php bin/console menu
+   php bin/webware menu
    ```
 
 ## Menu keys
