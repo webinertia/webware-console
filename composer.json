@@ -41,6 +41,7 @@
     },
     "scripts": {
         "console": "php bin/console",
+        "console-menu": "php bin/console menu",
         "menu": "php bin/console menu",
         "mutation-test": "infection",
         "test": "phpunit --testsuite unit",

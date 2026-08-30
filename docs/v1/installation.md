@@ -33,16 +33,16 @@ composer update
 
 ## Entry point
 
-The package ships a `bin/console` entry point over the bundled config and
-container bootstrap. From this repository:
+The simplest way in is a Composer alias that opens the menu:
 
 ```bash
-composer console          # run the Application
-composer menu             # open the menu directly
+composer console-menu    # or: composer menu
 ```
 
-Or invoke the entry point directly:
+Both aliases run the bundled `bin/console` entry point. Invoke it directly when
+needed:
 
 ```bash
-php bin/console
+php bin/console          # run the Application
+php bin/console menu     # open the menu directly
 ```

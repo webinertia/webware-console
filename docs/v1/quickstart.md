@@ -8,15 +8,21 @@
    composer install
    ```
 
-2. Launch the console:
+2. Open the menu:
+
+   ```bash
+   composer console-menu    # or: composer menu
+   ```
+
+   A menu opens listing the discovered commands with their descriptions.
+
+3. Alternatively, launch the raw Application:
 
    ```bash
    php bin/console
    ```
 
-   A menu opens listing the discovered commands with their descriptions.
-
-3. Launch the menu directly:
+   or the menu directly:
 
    ```bash
    php bin/console menu
