@@ -45,3 +45,11 @@ disabled):
 ```bash
 cp config/development.config.php.dist config/development.config.php
 ```
+
+## Consumer integration
+
+The `config/` and `data/` trees above are this package's own development
+scaffolding — they are not shipped in the published package. A Mezzio consumer
+merges `Webware\Console\ConfigProvider` through its own config aggregator and
+resolves `Application` from its own PSR-11 container; the merged configuration
+is available there at runtime via the container's `config` service.

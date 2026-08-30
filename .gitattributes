@@ -1,0 +1,14 @@
+# Dev-only paths excluded from the published package. src/ and bin/ ship.
+/.gitattributes export-ignore
+/.github/ export-ignore
+/.gitignore export-ignore
+/.specify/ export-ignore
+/config/ export-ignore
+/data/ export-ignore
+/docs/ export-ignore
+/specs/ export-ignore
+/test/ export-ignore
+/infection.json5.dist export-ignore
+/mago.toml export-ignore
+/phpunit.xml.dist export-ignore
+/renovate.json export-ignore

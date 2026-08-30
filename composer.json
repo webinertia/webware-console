@@ -2,6 +2,9 @@
     "name": "webware/webware-console",
     "description": "Webware Console — TUI application providing a menu and better help for Webware and Mezzio CLI commands",
     "license": "BSD-3-Clause",
+    "bin": [
+        "bin/console"
+    ],
     "keywords": [
         "webware",
         "console",
