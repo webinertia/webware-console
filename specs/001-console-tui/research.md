@@ -10,9 +10,9 @@ Phase 0 output — resolves the technical unknowns from the plan's Technical Con
 
 ## R-002: Command discovery
 
-- **Decision**: A `CommandCatalog` is populated at runtime from commands registered by components (through their config providers), never from a hardcoded list. Duplicate names are surfaced (disambiguated or flagged) rather than silently dropped.
-- **Rationale**: Satisfies the consumer-agnostic principle and FR-005/FR-006; new components contribute commands without console changes.
-- **Alternatives considered**: A static command list (rejected — contradicts runtime discovery); filesystem scanning for command classes (rejected — registration is explicit and container-friendly).
+- **Decision**: Commands are discovered through the `Webware\Console\ConsoleInterface` marker — its `::class` is the config key. Components register commands under that key (a `commands` map of name → command class). `CommandLoaderFactory` reads it, merges `config['laminas-cli']['commands']` (mezzio-tooling's key), and returns Symfony's lazy `ContainerCommandLoader` — commands are resolved from the shared PSR container only when invoked (the same mechanism laminas-cli uses), never instantiated eagerly. Duplicate names throw `DuplicateCommandException`.
+- **Rationale**: Satisfies the consumer-agnostic principle and FR-005/FR-006; new components contribute commands without console changes, and mezzio-tooling commands ride along via the merged `laminas-cli` key.
+- **Alternatives considered**: A static command list (rejected — contradicts runtime discovery); filesystem scanning for command classes (rejected — registration is explicit and container-friendly); a console-only key without the `laminas-cli` merge (rejected — misses mezzio-tooling commands).
 
 ## R-003: Menu interaction model
 
@@ -34,6 +34,12 @@ Phase 0 output — resolves the technical unknowns from the plan's Technical Con
 
 ## R-006: mezzio-tooling integration
 
-- **Decision**: Deferred to a later iteration. v1 surfaces Symfony-style commands registered by components; long-term the console wraps mezzio-tooling commands in addition.
-- **Rationale**: The constitution names mezzio-tooling as a long-term direction, not a v1 requirement; keeping v1 to the Symfony command contract keeps scope bounded.
-- **Alternatives considered**: Building the mezzio-tooling adapter in v1 (rejected — expands scope without a current consumer).
+- **Decision**: mezzio-tooling command **discovery** is in scope — `CommandLoaderFactory` merges `config['laminas-cli']['commands']` (mezzio-tooling's key) so mezzio-tooling commands are discovered for free, no adapter needed. Fully **wrapping** mezzio-tooling's TUI (rendering/UX) is deferred to a later iteration.
+- **Rationale**: The merge is free (ConfigAggregator already merges the `laminas-cli` key) and covers the Mezzio half of discovery; wrapping the TUI is a larger effort with no current consumer.
+- **Alternatives considered**: Building a full mezzio-tooling adapter in v1 (rejected — expands scope); ignoring mezzio-tooling commands entirely (rejected — the laminas-cli merge is zero-cost and keeps Mezzio discovery honest).
+
+## R-007: Symfony Console version alignment
+
+- **Decision**: Declare `symfony/console` as `^7.4 || ^8.0` — the exact range `laminas/laminas-cli` allows. Composer resolves a single shared version; webware-console owns the Symfony runtime and runs laminas-cli commands in-process, so both must agree on the major.
+- **Rationale**: `laminas/laminas-cli` requires `symfony/console ^7.4 || ^8.0`; `mezzio/mezzio-tooling` has no runtime `symfony/console` requirement (dev-only pin). Mirroring laminas-cli's range lets any consuming app install both packages with one joint version — no conflict whether it targets Symfony 7 or 8.
+- **Alternatives considered**: Single-major pin `^7.4` (works, but drags Symfony 8 apps down to 7.4); unbounded `*` (rejects nothing, loses the version guard).

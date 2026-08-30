@@ -12,6 +12,13 @@ invocation with output and exit status. Commands are discovered from installed
 Webware components and Mezzio at runtime. Built in PHP with a terminal/ANSI
 rendering stack and Symfony Console as the command contract.
 
+webware-console is a **generic CLI host with zero migration knowledge**: it owns
+the Symfony runtime (Application, `bin/` entry, config/container bootstrap) and
+command discovery. webware-migration keeps its own Symfony commands and has a
+hard `require` on this package — the dependency direction is one-way
+(**migration → console**); components register commands through their
+`ConfigProvider`.
+
 ## Technical Context
 
 **Language/Version**: PHP ~8.4.1 || ~8.5.0
@@ -38,9 +45,9 @@ rendering stack and Symfony Console as the command contract.
 
 - **I. Library-First** — PASS: single-purpose, self-contained console component.
 - **II. TUI-First** — PASS: menu + help; presents and invokes commands without reimplementing them.
-- **III. Consumer-Agnostic** — PASS: runtime discovery from Webware components and Mezzio; no application hard-coupling.
+- **III. Consumer-Agnostic** — PASS: generic CLI host with zero migration knowledge; components register commands via their `ConfigProvider`; one-way dependency (migration → console); no application hard-coupling.
 - **IV. Webware Quality Gates** — PASS: PHPUnit 13 strict mode, Mago gates, Infection coverage are planned in.
-- **V. Naming & Compatibility** — PASS: `Webware\Console\` namespace; no redundant prefixes; PHP ~8.4.1 || ~8.5.0.
+- **V. Naming & Compatibility** — PASS: `Webware\Console\` namespace; PHP ~8.4.1 || ~8.5.0.
 
 No violations requiring justification.
 
@@ -62,29 +69,46 @@ specs/[###-feature]/
 
 ```text
 src/
+├── ConsoleInterface.php             # discovery contract — config key (marker)
 ├── Menu/
-│   ├── Menu.php                     # keyboard-navigable menu
-│   └── MenuRenderer.php             # terminal rendering of the menu
-├── Catalog/
-│   ├── CommandCatalog.php           # discovered commands
-│   └── CommandCatalogFactory.php    # build catalog from registered commands
+│   ├── Menu.php                     # keyboard navigation state over command names
+│   ├── MenuRenderer.php             # Widget\Menu rendering of the menu
+│   └── MenuCommand.php              # Symfony 'menu' command (TUI entry)
 ├── Help/
 │   └── HelpFormatter.php            # render purpose/arguments/options
 ├── Prompt/
 │   └── CommandInputPrompter.php     # collect inputs for a selected command
 ├── Runner/
 │   └── CommandRunner.php            # invoke command, capture output + status
-├── Container/                       # factories for catalog, menu, runner
+├── Container/                       # CommandLoaderFactory, ApplicationFactory, MenuCommandFactory
+├── Exception/                       # DuplicateCommandException
 └── ConfigProvider.php               # DI wiring
+
+bin/
+└── console                          # Symfony Application + menu launch entry
+
+config/                              # ConfigAggregator + ServiceManager skeleton (moved from webware-migration)
+├── autoload/
+│   ├── dependencies.global.php
+│   └── global.php
+├── config.php
+├── container.php
+└── development.config.php.dist
+
+data/
+└── cache/
 
 test/
 ├── unit/
 └── integration/
 ```
 
-**Structure Decision**: Single CLI package (`src/` + `test/`). The catalog is the
-discovery boundary (commands registered by components); the menu/help/prompt/runner
-are presentation and invocation layers. No persistence layer — the TUI is stateless.
+**Structure Decision**: Single CLI package (`src/` + `test/` + `bin/` + `config/`).
+Discovery is lazy — components register commands under the `ConsoleInterface::class`
+config key, and `CommandLoaderFactory` merges `config['laminas-cli']['commands']`
+into a Symfony `ContainerCommandLoader` (no command is instantiated until invoked).
+The menu/help/prompt/runner are presentation and invocation layers. No persistence
+layer — the TUI is stateless.
 
 ## Complexity Tracking
 

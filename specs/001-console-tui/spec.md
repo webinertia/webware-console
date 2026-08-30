@@ -94,7 +94,7 @@ The menu automatically reflects the commands provided by installed Webware compo
 ### Key Entities *(include if feature involves data)*
 
 - **Command**: an invocable operation with a name, a short purpose, arguments, and options.
-- **Command catalog**: the discovered collection of commands presented in the menu.
+- **Command map**: the discovered name => command-class registrations presented in the menu (loaded lazily via a Symfony command loader).
 
 ## Success Criteria *(mandatory)*
 
@@ -109,7 +109,8 @@ The menu automatically reflects the commands provided by installed Webware compo
 ## Assumptions
 
 - Commands are provided by other components (Webware components and Mezzio); the console presents and invokes them and does not reimplement their logic.
+- webware-console is a generic CLI host with zero migration knowledge; webware-migration depends on it (one-way: migration → console), and components register commands through their `ConfigProvider`.
 - The console is operated from a terminal with keyboard input as the primary interaction.
 - The rendering stack for the text interface is decided during planning, not in this specification.
-- In v1 the console focuses on the menu, help, and invocation; wrapping mezzio-tooling is a longer-term direction.
+- In v1 the console focuses on the menu, help, and invocation. mezzio-tooling commands are discovered via the merged `laminas-cli` config key; fully wrapping mezzio-tooling's TUI remains a longer-term direction.
 - Discovered commands are component-registered commands, not arbitrary shell commands.
