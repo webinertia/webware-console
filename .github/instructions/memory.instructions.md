@@ -26,7 +26,10 @@ Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery,
   - spec (`/speckit-specify`) — MERGED (US1–US4; FR-001…FR-008).
   - plan (`/speckit-plan`) — MERGED (plan.md, research.md R-001…R-006, data-model.md,
     contracts/, quickstart.md).
-  - tasks (`/speckit-tasks`) — MERGED (PR #6; T001–T028). Next: `/speckit-analyze`.
+  - tasks (`/speckit-tasks`) — task list generated on `tasks/console-tui`; that branch became the
+    implementation branch. US1–US4 + polish T023–T026 DONE; T027–T028 open. PR #7
+    (`refactor/prompt-key-dispatch`) was squash-merged into it; PR #6 (`tasks/console-tui` →
+    `0.1.x`) is the open implementation PR.
   - Speckit docs aligned 2026-08-30 to the handoff decisions below
     (`ConsoleInterface::class` config key, lazy `ContainerCommandLoader` +
     `laminas-cli` merge, generic-host/one-way-dep, moved config/data skeleton,
@@ -130,7 +133,7 @@ Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery,
 ## Next actions
 
 1. Remaining polish: T027 (README badges + usage) and T028 (`quickstart.md` end-to-end validation).
-2. Done so far (all merged-ready on `refactor/prompt-key-dispatch`): Phase 1–2, US1–US4,
+2. Done so far (all merged-ready on `tasks/console-tui`, PR #6): Phase 1–2, US1–US4,
    and polish T023–T026. Quality Gate IV is met — 100% line coverage (373/373) and
    100% mutation coverage (MSI 100: 252 generated, 249 killed, 3 static-analysis, 0 escaped,
    8 ignored equivalent mutants).
