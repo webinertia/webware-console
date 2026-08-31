@@ -28,7 +28,7 @@ final readonly class SymfonyFactory
 
         $application = new Application(
             name   : 'webware-console',
-            version: '0.1.0',
+            version: '0.1.x',
         );
         $application->setCommandLoader($loader);
         $application->addCommand($menuCommand);
