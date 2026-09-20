@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "85aad555b43f9ca90956cfc7354609c2",
+    "content-hash": "e6a233538f37314c0094bbb000ee6170",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -6195,16 +6195,16 @@
         },
         {
             "name": "webware/webware-tools",
-            "version": "0.1.x-dev",
+            "version": "1.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webinertia/webware-tools.git",
-                "reference": "744216f665ebd2e96119457c6a1b8b061d6e5fcc"
+                "reference": "8c4deefee3e09ff30d2af3fde6250045134dfa4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webinertia/webware-tools/zipball/744216f665ebd2e96119457c6a1b8b061d6e5fcc",
-                "reference": "744216f665ebd2e96119457c6a1b8b061d6e5fcc",
+                "url": "https://api.github.com/repos/webinertia/webware-tools/zipball/8c4deefee3e09ff30d2af3fde6250045134dfa4e",
+                "reference": "8c4deefee3e09ff30d2af3fde6250045134dfa4e",
                 "shasum": ""
             },
             "require": {
@@ -6213,7 +6213,6 @@
             "require-dev": {
                 "roave/security-advisories": "dev-master"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -6239,16 +6238,14 @@
             ],
             "support": {
                 "issues": "https://github.com/webinertia/webware-tools/issues",
-                "source": "https://github.com/webinertia/webware-tools/tree/0.1.x"
+                "source": "https://github.com/webinertia/webware-tools/tree/1.0.0-beta.2"
             },
-            "time": "2026-09-16T18:25:18+00:00"
+            "time": "2026-09-20T01:24:50+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "webware/webware-tools": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
