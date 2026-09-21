@@ -100,7 +100,7 @@ Tagline: Generic CLI host — owns the Symfony runtime + lazy command discovery,
 
 - **Named parameters = hard requirement.** Always use named arguments (saved to global memory).
 - mago lint is the backstop; rules docs (reference for "what to prefer"):
-  https://mago.carthage.software/1.47.3/en/tools/linter/rules/
+  https://mago.carthage.software/latest/en/tools/linter/rules/
 - Greenfield: **no mago baselines** — resolve every lint/analyze/guard finding at source.
 - PHPUnit 13: `#[CoversClass]` + `#[CoversMethod]` per class, `createStub()` for value doubles,
   `createMock()` only with `expects()`, `static::assert*`.
