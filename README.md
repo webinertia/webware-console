@@ -3,7 +3,7 @@
 A text user interface for Webware and Mezzio CLI commands — a navigable menu,
 better per-command help, and interactive input, built over Symfony Console.
 
-[![Continuous Integration](https://github.com/webinertia/webware-console/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/webinertia/webware-console/actions/workflows/continuous-integration.yml)
+[![Required CI](https://github.com/webinertia/webware-console/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml/badge.svg)](https://github.com/webinertia/webware-console/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml)
 [![codecov](https://codecov.io/gh/webinertia/webware-console/graph/badge.svg)](https://codecov.io/gh/webinertia/webware-console)
 
 `webware/webware-console` is a **generic CLI host**. It owns the Symfony Console
