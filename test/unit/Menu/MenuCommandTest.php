@@ -136,6 +136,23 @@ final class MenuCommandTest extends TestCase
     }
 
     #[Test]
+    public function testLaysOutTheResultBlocks(): void
+    {
+        $console = new FakeConsole()->withScripts([
+            [Event\Key::named('down'), Event\Key::named('down'), Event\Key::named('enter')],
+            [Event\Key::named('ctrl+c')],
+        ]);
+
+        $this->buildCommand($console)->run(new ArrayInput([]), new NullOutput());
+
+        $frame = $console->frames()[1];
+
+        static::assertSame('Boom.', $this->row($frame, 0));
+        static::assertSame(2, $this->rowIndex($frame, 'Status: command failed (1)'));
+        static::assertSame(4, $this->rowIndex($frame, 'Press any key to return to the menu.'));
+    }
+
+    #[Test]
     public function testRunMenuClearsHelpOnTheNextKey(): void
     {
         $console = new FakeConsole()->withScripts([
@@ -265,6 +282,17 @@ final class MenuCommandTest extends TestCase
         return rtrim($line);
     }
 
+    private function rowIndex(Frame $frame, string $prefix): int
+    {
+        for ($y = 0; $y < $frame->buffer()->getHeight(); $y++) {
+            if (str_starts_with($this->row($frame, $y), $prefix)) {
+                return $y;
+            }
+        }
+
+        return -1;
+    }
+
     /**
      * @param list<ControlSequenceIntroducer> $style
      *
@@ -278,13 +306,9 @@ final class MenuCommandTest extends TestCase
     /** @return list<ControlSequenceIntroducer> */
     private function statusStyle(Frame $frame): array
     {
-        for ($y = 0; $y < $frame->buffer()->getHeight(); $y++) {
-            if (str_starts_with($this->row($frame, $y), 'Status: ')) {
-                return $frame->buffer()->get(0, $y)->style ?? [];
-            }
-        }
+        $y = $this->rowIndex($frame, 'Status: ');
 
-        return [];
+        return $y < 0 ? [] : $frame->buffer()->get(0, $y)->style ?? [];
     }
 
     private function text(Frame $frame): string

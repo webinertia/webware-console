@@ -49,6 +49,28 @@ final class MenuRendererTest extends TestCase
     }
 
     #[Test]
+    public function testRendersNothingWhenTheOffsetExceedsTheFrameHeight(): void
+    {
+        $frame = new Frame(
+            Rect::fromSize(
+                width : 20,
+                height: 3,
+            ),
+            new Buffer(
+                width : 20,
+                height: 10,
+            ),
+        );
+
+        new MenuRenderer()->renderText($frame, "line-0\nline-1\nline-2", [], 4);
+
+        $text = $this->text($frame);
+
+        static::assertStringNotContainsString('line-0', $text);
+        static::assertStringNotContainsString('line-1', $text);
+    }
+
+    #[Test]
     public function testRendersStyledTextAtAnOffset(): void
     {
         $frame    = $this->frame();
