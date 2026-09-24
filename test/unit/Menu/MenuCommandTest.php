@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psl\Ansi\ControlSequenceIntroducer;
 use Psl\Terminal\Event;
 use Psl\Terminal\Frame;
 use Psr\Container\ContainerInterface;
@@ -26,8 +27,13 @@ use Webware\Console\Test\Unit\Container\Fixture\BarCommand;
 use Webware\Console\Test\Unit\Container\Fixture\FailingCommand;
 use Webware\Console\Test\Unit\Container\Fixture\FooCommand;
 
+use function array_map;
 use function implode;
+use function Psl\Ansi\Color\green;
+use function Psl\Ansi\Color\red;
+use function Psl\Ansi\foreground;
 use function rtrim;
+use function str_starts_with;
 
 #[CoversClass(MenuCommand::class)]
 #[CoversMethod(MenuCommand::class, '__construct')]
@@ -105,7 +111,11 @@ final class MenuCommandTest extends TestCase
         $this->buildCommand($console, $fetched)->run(new ArrayInput([]), new NullOutput());
 
         static::assertContains(FailingCommand::class, $fetched);
-        static::assertStringContainsString('Status: failure', $this->text($console->frames()[1]));
+        static::assertStringContainsString('Status: command failed (1)', $this->text($console->frames()[1]));
+        static::assertSame(
+            $this->sequenceStrings([foreground(red())]),
+            $this->sequenceStrings($this->statusStyle($console->frames()[1])),
+        );
     }
 
     #[Test]
@@ -118,7 +128,28 @@ final class MenuCommandTest extends TestCase
 
         $this->buildCommand($console)->run(new ArrayInput([]), new NullOutput());
 
-        static::assertStringContainsString('Status: success', $this->text($console->frames()[1]));
+        static::assertStringContainsString('Status: command successful', $this->text($console->frames()[1]));
+        static::assertSame(
+            $this->sequenceStrings([foreground(green())]),
+            $this->sequenceStrings($this->statusStyle($console->frames()[1])),
+        );
+    }
+
+    #[Test]
+    public function testLaysOutTheResultBlocks(): void
+    {
+        $console = new FakeConsole()->withScripts([
+            [Event\Key::named('down'), Event\Key::named('down'), Event\Key::named('enter')],
+            [Event\Key::named('ctrl+c')],
+        ]);
+
+        $this->buildCommand($console)->run(new ArrayInput([]), new NullOutput());
+
+        $frame = $console->frames()[1];
+
+        static::assertSame('Boom.', $this->row($frame, 0));
+        static::assertSame(2, $this->rowIndex($frame, 'Status: command failed (1)'));
+        static::assertSame(4, $this->rowIndex($frame, 'Press any key to return to the menu.'));
     }
 
     #[Test]
@@ -239,19 +270,53 @@ final class MenuCommandTest extends TestCase
         );
     }
 
+    private function row(Frame $frame, int $y): string
+    {
+        $line = '';
+
+        for ($x = 0; $x < $frame->buffer()->getWidth(); $x++) {
+            $cell = $frame->buffer()->get($x, $y);
+            $line .= null === $cell ? ' ' : $cell->grapheme;
+        }
+
+        return rtrim($line);
+    }
+
+    private function rowIndex(Frame $frame, string $prefix): int
+    {
+        for ($y = 0; $y < $frame->buffer()->getHeight(); $y++) {
+            if (str_starts_with($this->row($frame, $y), $prefix)) {
+                return $y;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * @param list<ControlSequenceIntroducer> $style
+     *
+     * @return list<string>
+     */
+    private function sequenceStrings(array $style): array
+    {
+        return array_map(static fn(ControlSequenceIntroducer $sequence): string => (string) $sequence, $style);
+    }
+
+    /** @return list<ControlSequenceIntroducer> */
+    private function statusStyle(Frame $frame): array
+    {
+        $y = $this->rowIndex($frame, 'Status: ');
+
+        return $y < 0 ? [] : $frame->buffer()->get(0, $y)->style ?? [];
+    }
+
     private function text(Frame $frame): string
     {
         $lines = [];
 
         for ($y = 0; $y < $frame->buffer()->getHeight(); $y++) {
-            $line = '';
-
-            for ($x = 0; $x < $frame->buffer()->getWidth(); $x++) {
-                $cell = $frame->buffer()->get($x, $y);
-                $line .= null === $cell ? ' ' : $cell->grapheme;
-            }
-
-            $lines[] = rtrim($line);
+            $lines[] = $this->row($frame, $y);
         }
 
         return implode("\n", $lines);

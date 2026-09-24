@@ -13,10 +13,18 @@ use Webware\Console\Runner\ResultState;
 final class ResultStateTest extends TestCase
 {
     #[Test]
-    public function testText(): void
+    public function testHoldsTheResultParts(): void
     {
-        $state = new ResultState('output');
+        $state = new ResultState(
+            output     : 'output',
+            status     : 'Status: command successful',
+            statusStyle: [],
+            prompt     : 'Press any key to return to the menu.',
+        );
 
-        static::assertSame('output', $state->text);
+        static::assertSame('output', $state->output);
+        static::assertSame('Status: command successful', $state->status);
+        static::assertSame([], $state->statusStyle);
+        static::assertSame('Press any key to return to the menu.', $state->prompt);
     }
 }
