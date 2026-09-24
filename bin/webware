@@ -6,17 +6,47 @@ declare(strict_types=1);
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application;
 
-if (file_exists($autoload = __DIR__ . '/../../../autoload.php')) {
-    require $autoload;
-} elseif (file_exists($autoload = __DIR__ . '/../vendor/autoload.php')) {
-    require $autoload;
+/**
+ * Resolution order matters. `__DIR__` is symlink-resolved, so when this package is
+ * installed from a `path` repository with `"symlink": true` the resolved path points at
+ * the package's own checkout — not the consumer's `vendor/` — and the classic
+ * `__DIR__ . '/../../../autoload.php'` probe misses. Prefer the autoloader Composer's bin
+ * proxy hands us, which is always the consuming project's.
+ */
+$composerAutoloadPath = $GLOBALS['_composer_autoload_path'] ?? null;
+
+if (is_string($composerAutoloadPath)) {
+    // Invoked through vendor/bin: the consumer's autoloader, and therefore its
+    // config, is authoritative.
+    $autoload = $composerAutoloadPath;
+} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+    // Installed into a consumer's vendor/ without the bin proxy.
+    $autoload = __DIR__ . '/../../../autoload.php';
 } else {
+    // Running from this repository's own checkout.
+    $autoload = __DIR__ . '/../vendor/autoload.php';
+}
+
+if (! file_exists($autoload)) {
     fwrite(STDERR, 'Cannot locate the Composer autoloader; run "composer install" first.' . PHP_EOL);
 
     exit(1);
 }
 
-$projectRoot = dirname($autoload) . '/../';
+// Normalise before walking up. The bin proxy hands us "vendor/bin/../autoload.php", and
+// dirname() is purely textual — it would strip the ".." rather than resolve it.
+$autoload = realpath($autoload);
+
+if ($autoload === false) {
+    fwrite(STDERR, 'Cannot resolve the Composer autoloader path.' . PHP_EOL);
+
+    exit(1);
+}
+
+require $autoload;
+
+// <project>/vendor/autoload.php => <project>/
+$projectRoot = dirname($autoload, 2) . '/';
 
 chdir($projectRoot);
 
