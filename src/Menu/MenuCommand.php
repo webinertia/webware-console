@@ -20,6 +20,12 @@ use Webware\Console\Prompt\CommandInputPrompter;
 use Webware\Console\Runner\CommandRunner;
 use Webware\Console\Runner\ResultState;
 
+use function count;
+use function explode;
+use function Psl\Ansi\Color\green;
+use function Psl\Ansi\Color\red;
+use function Psl\Ansi\foreground;
+use function rtrim;
 use function sprintf;
 
 /**
@@ -89,15 +95,20 @@ final class MenuCommand extends Command
     /**
      * @param array{status: int, output: string} $result
      */
-    private function formatResult(array $result): string
+    private function formatResult(array $result): ResultState
     {
-        $status = 0 === $result['status'] ? 'success' : 'failure';
+        $failed = 0 !== $result['status'];
 
-        return sprintf(
-            "%s\n\nStatus: %s (%d)\n\nPress any key to return to the menu.",
-            $result['output'],
-            $status,
-            $result['status'],
+        return new ResultState(
+            output     : rtrim(
+                string    : $result['output'],
+                characters: "\n",
+            ),
+            status     : $failed
+                ? sprintf('Status: command failed (%d)', $result['status'])
+                : 'Status: command successful',
+            statusStyle: [foreground($failed ? red() : green())],
+            prompt     : 'Press any key to return to the menu.',
         );
     }
 
@@ -171,7 +182,7 @@ final class MenuCommand extends Command
      */
     private function showResult(array $result): void
     {
-        $state = new ResultState($this->formatResult($result));
+        $state = $this->formatResult($result);
 
         $this->console->run(
             title : 'Command output',
@@ -180,7 +191,15 @@ final class MenuCommand extends Command
                 $this->console->stop();
             },
             render: function (Frame $frame, ResultState $state): void {
-                $this->renderer->renderText($frame, $state->text);
+                $offset =
+                    count(explode(
+                        separator: "\n",
+                        string   : $state->output,
+                    )) + 1;
+
+                $this->renderer->renderText($frame, $state->output);
+                $this->renderer->renderText($frame, $state->status, $state->statusStyle, $offset);
+                $this->renderer->renderText($frame, $state->prompt, [], $offset + 2);
             },
         );
     }

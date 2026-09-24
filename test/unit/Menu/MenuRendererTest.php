@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psl\Ansi\ControlSequenceIntroducer;
 use Psl\Terminal\Buffer;
 use Psl\Terminal\Frame;
 use Psl\Terminal\Rect;
@@ -15,6 +16,8 @@ use Webware\Console\Menu\Menu;
 use Webware\Console\Menu\MenuRenderer;
 
 use function implode;
+use function Psl\Ansi\Color\green;
+use function Psl\Ansi\foreground;
 use function rtrim;
 
 #[CoversClass(MenuRenderer::class)]
@@ -43,6 +46,19 @@ final class MenuRendererTest extends TestCase
         new MenuRenderer()->render(new Menu([]), $frame);
 
         static::assertStringContainsString('No commands available.', $this->text($frame));
+    }
+
+    #[Test]
+    public function testRendersStyledTextAtAnOffset(): void
+    {
+        $frame    = $this->frame();
+        $renderer = new MenuRenderer();
+
+        $renderer->renderText($frame, 'plain');
+        $renderer->renderText($frame, 'styled', [foreground(green())], 2);
+
+        static::assertSame([], $this->styleAt($frame, 0, 0));
+        static::assertNotSame([], $this->styleAt($frame, 0, 2));
     }
 
     #[Test]
@@ -93,6 +109,14 @@ final class MenuRendererTest extends TestCase
                 height: 10,
             ),
         );
+    }
+
+    /** @return list<ControlSequenceIntroducer> */
+    private function styleAt(Frame $frame, int $x, int $y): array
+    {
+        $cell = $frame->buffer()->get($x, $y);
+
+        return null === $cell ? [] : $cell->style;
     }
 
     private function text(Frame $frame): string
