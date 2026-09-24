@@ -130,20 +130,14 @@ final class MenuCommand extends Command
 
                 if ($event->is(key: 'ctrl+c') || $event->is(key: 'q')) {
                     $this->console->stop();
-
-                    return;
                 }
 
                 if ($event->is(key: 'up')) {
                     $menu->moveUp();
-
-                    return;
                 }
 
                 if ($event->is(key: 'down')) {
                     $menu->moveDown();
-
-                    return;
                 }
 
                 if ($event->is(key: 'h')) {
@@ -152,8 +146,6 @@ final class MenuCommand extends Command
                     if (null !== $name) {
                         $menu->help = $this->formatHelp($name);
                     }
-
-                    return;
                 }
 
                 if ($event->is(key: 'enter')) {
