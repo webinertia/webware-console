@@ -19,12 +19,14 @@ use Webware\Console\Container\AppFactory;
 use Webware\Console\Container\MenuCommandFactory;
 use Webware\Console\Container\PslTerminalFactoryFactory;
 use Webware\Console\Container\SymfonyFactory;
+use Webware\Console\DevelopmentModeCommand;
 use Webware\Console\Menu\MenuCommand;
 use Webware\Console\Test\Unit\Container\Fixture\BarCommand;
 use Webware\Console\Test\Unit\Container\Fixture\FooCommand;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
+#[CoversClass(DevelopmentModeCommand::class)]
 #[CoversClass(SymfonyFactory::class)]
 #[CoversMethod(SymfonyFactory::class, '__invoke')]
 #[CoversClass(MenuCommandFactory::class)]
@@ -64,6 +66,7 @@ final class CommandRegistrationIntegrationTest extends TestCase
         $application = $container->get(Application::class);
 
         static::assertInstanceOf(MenuCommand::class, $application->find('menu'));
+        static::assertInstanceOf(DevelopmentModeCommand::class, $application->find('dev:mode'));
         static::assertInstanceOf(FooCommand::class, $application->find('foo'));
         static::assertInstanceOf(BarCommand::class, $application->find('bar'));
     }

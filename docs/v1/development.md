@@ -29,6 +29,29 @@ mago guard      # architectural guards
   `createStub()`, interaction doubles use `createMock()` with `expects()`.
 - Mutation coverage is enforced at 100% MSI by the CI workflow.
 
+## Development mode
+
+Development mode is the presence of `config/development.config.php`, a copy of the committed
+`config/development.config.php.dist`. The config aggregator loads it last, so it turns the `debug`
+flag on and configuration caching off.
+
+The console ships the command that toggles it, so a consumer needs no script of its own:
+
+```bash
+php bin/webware dev:mode --status    # report whether development mode is enabled
+php bin/webware dev:mode --enable    # copy the dist file into place
+php bin/webware dev:mode --disable   # remove the active file
+```
+
+Enabling and disabling both drop the aggregated config cache: a cache written while one state was in
+force is stale for the other, and development mode only means anything if config changes take effect
+immediately. The cache path comes from the application's own `config_cache_path` rather than a
+hardcoded location.
+
+Paths resolve against the working directory, which `bin/webware` sets to the project root. A failure
+— a missing dist file, a target that cannot be written, an active file that cannot be removed —
+returns a non-zero exit code.
+
 ## CI
 
 `.github/workflows/continuous-integration.yml` delegates to the shared
