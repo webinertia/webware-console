@@ -58,20 +58,32 @@ stale state outlive the toggle meant to end it.
 Parity in a Mezzio application is not only the command. The reference is normally reached
 through Composer scripts, which the console cannot supply from inside this package:
 
+The reference is normally reached through Composer scripts, and a migrating application also needs
+`config/autoload/development.local.php.dist` present if it wants rows 1 and 2 to do anything.
+
+**That script set is deliberately not replicated.** The only Composer script a console application
+needs is the one that starts the menu:
+
 ```json
 "scripts": {
-    "post-install-cmd": ["@development-enable"],
-    "post-update-cmd": ["@development-enable"],
-    "development-disable": "laminas-development-mode disable",
-    "development-enable": "laminas-development-mode enable",
-    "development-status": "laminas-development-mode status"
+    "menu": "webware menu"
 }
 ```
 
-Any application migrating to the console needs the equivalent wiring against `dev:mode`, and
-needs `config/autoload/development.local.php.dist` present if it wants row 1 and row 2 to do
-anything. Whether that wiring belongs in the application, in the `webware-alignment` preset,
-or in the skeleton is a decision for the repository template, not this package.
+For the record, so that its absence reads as a decision rather than an oversight, this is what the
+reference wires and we do not:
+
+```json
+"post-install-cmd": ["@development-enable"],
+"post-update-cmd": ["@development-enable"],
+"development-disable": "laminas-development-mode disable",
+"development-enable": "laminas-development-mode enable",
+"development-status": "laminas-development-mode status"
+```
+
+Development mode is therefore always an explicit action: chosen from the menu, or run as
+`dev:mode` on the CLI. `--auto-composer` (row 4) stays available for parity, but nothing in the
+stack wires it up.
 
 ## Invocation
 
