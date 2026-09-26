@@ -29,6 +29,11 @@ use function unlink;
  * while one state was in force is stale for the other, and development mode only
  * means anything if config changes take effect immediately.
  *
+ * The cache is dropped on every enable and disable, including when the requested
+ * state is already in force. A surviving cache is authoritative - the aggregator
+ * returns it without consulting a single provider - so leaving one behind is what
+ * lets a stale state outlive the toggle that was meant to end it.
+ *
  * Paths are relative to the working directory, which the console binary sets to
  * the project root before it builds the container.
  *
@@ -88,19 +93,12 @@ final class DevelopmentModeCommand extends Command
     #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (true === $input->getOption('enable')) {
-            return $this->enable($output);
-        }
-
-        if (true === $input->getOption('disable')) {
-            return $this->disable($output);
-        }
-
-        if (true === $input->getOption('status')) {
-            return $this->status($output);
-        }
-
-        return $this->usage($output);
+        return match (true) {
+            true === $input->getOption('enable') => $this->enable($output),
+            true === $input->getOption('disable') => $this->disable($output),
+            true === $input->getOption('status') => $this->status($output),
+            default => $this->usage($output),
+        };
     }
 
     /**
@@ -109,17 +107,42 @@ final class DevelopmentModeCommand extends Command
      */
     private function clearConfigCache(OutputInterface $output): void
     {
-        if (null === $this->configCachePath) {
-            return;
-        }
-
-        if (! file_exists($this->configCachePath)) {
+        if (null === $this->configCachePath || ! file_exists($this->configCachePath)) {
             return;
         }
 
         unlink($this->configCachePath);
 
         $output->writeln(sprintf('Removed the config cache at "%s".', $this->configCachePath));
+    }
+
+    /**
+     * Copies the committed dist file over the active file.
+     *
+     * Reports its own failure, so the caller only decides the exit code.
+     */
+    private function copyDistFile(OutputInterface $output): bool
+    {
+        if (! file_exists(self::DIST_FILE)) {
+            $output->writeln(sprintf(
+                '<error>Dist file "%s" not found.</error>',
+                self::DIST_FILE,
+            ));
+
+            return false;
+        }
+
+        if (! copy(self::DIST_FILE, self::ACTIVE_FILE)) {
+            $output->writeln(sprintf(
+                '<error>Unable to copy "%s" to "%s".</error>',
+                self::DIST_FILE,
+                self::ACTIVE_FILE,
+            ));
+
+            return false;
+        }
+
+        return true;
     }
 
     private function developmentModeEnabled(): bool
@@ -129,13 +152,9 @@ final class DevelopmentModeCommand extends Command
 
     private function disable(OutputInterface $output): int
     {
-        if (! $this->developmentModeEnabled()) {
-            $output->writeln('<comment>Development mode is already disabled.</comment>');
+        $enabled = $this->developmentModeEnabled();
 
-            return Command::SUCCESS;
-        }
-
-        if (! unlink(self::ACTIVE_FILE)) {
+        if ($enabled && ! unlink(self::ACTIVE_FILE)) {
             $output->writeln(sprintf(
                 '<error>Unable to remove "%s".</error>',
                 self::ACTIVE_FILE,
@@ -146,41 +165,30 @@ final class DevelopmentModeCommand extends Command
 
         $this->clearConfigCache($output);
 
-        $output->writeln('<info>Development mode DISABLED.</info>');
+        $output->writeln(
+            $enabled
+                ? '<info>Development mode DISABLED.</info>'
+                : '<comment>Development mode is already disabled.</comment>',
+        );
 
         return Command::SUCCESS;
     }
 
     private function enable(OutputInterface $output): int
     {
-        if ($this->developmentModeEnabled()) {
-            $output->writeln('<comment>Development mode is already enabled.</comment>');
+        $enabled = $this->developmentModeEnabled();
 
-            return Command::SUCCESS;
-        }
-
-        if (! file_exists(self::DIST_FILE)) {
-            $output->writeln(sprintf(
-                '<error>Dist file "%s" not found.</error>',
-                self::DIST_FILE,
-            ));
-
-            return Command::FAILURE;
-        }
-
-        if (! copy(self::DIST_FILE, self::ACTIVE_FILE)) {
-            $output->writeln(sprintf(
-                '<error>Unable to copy "%s" to "%s".</error>',
-                self::DIST_FILE,
-                self::ACTIVE_FILE,
-            ));
-
+        if (! $enabled && ! $this->copyDistFile($output)) {
             return Command::FAILURE;
         }
 
         $this->clearConfigCache($output);
 
-        $output->writeln('<info>Development mode ENABLED.</info>');
+        $output->writeln(
+            $enabled
+                ? '<comment>Development mode is already enabled.</comment>'
+                : '<info>Development mode ENABLED.</info>',
+        );
 
         return Command::SUCCESS;
     }

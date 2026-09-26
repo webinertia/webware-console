@@ -45,8 +45,12 @@ php bin/webware dev:mode --disable   # remove the active file
 
 Enabling and disabling both drop the aggregated config cache: a cache written while one state was in
 force is stale for the other, and development mode only means anything if config changes take effect
-immediately. The cache path comes from the application's own `config_cache_path` rather than a
-hardcoded location.
+immediately.
+
+The cache is dropped on every invocation, including when the requested state is already in force. The
+aggregator serves an existing cache without consulting a single provider, so a surviving cache is
+what lets a stale state outlive the toggle that was meant to end it. The cache path comes from the
+application's own `config_cache_path` rather than a hardcoded location.
 
 Paths resolve against the working directory, which `bin/webware` sets to the project root. A failure
 — a missing dist file, a target that cannot be written, an active file that cannot be removed —

@@ -40,6 +40,7 @@ use function unlink;
 #[CoversMethod(DevelopmentModeCommand::class, 'status')]
 #[CoversMethod(DevelopmentModeCommand::class, 'usage')]
 #[CoversMethod(DevelopmentModeCommand::class, 'clearConfigCache')]
+#[CoversMethod(DevelopmentModeCommand::class, 'copyDistFile')]
 #[CoversMethod(DevelopmentModeCommand::class, 'developmentModeEnabled')]
 final class DevelopmentModeCommandTest extends TestCase
 {
@@ -64,18 +65,6 @@ final class DevelopmentModeCommandTest extends TestCase
         static::assertSame(Command::FAILURE, $status);
         static::assertStringContainsString(
             'Unable to remove "config/development.config.php".',
-            $tester->getDisplay(),
-        );
-    }
-
-    #[Test]
-    public function testDisableLeavesAnAlreadyDisabledApplicationAlone(): void
-    {
-        $tester = $this->tester();
-
-        static::assertSame(Command::SUCCESS, $tester->execute(['--disable' => true]));
-        static::assertStringContainsString(
-            'Development mode is already disabled.',
             $tester->getDisplay(),
         );
     }
@@ -107,6 +96,27 @@ final class DevelopmentModeCommandTest extends TestCase
         $tester = $this->tester(configCachePath: self::CACHE_FILE);
 
         static::assertSame(Command::SUCCESS, $tester->execute(['--disable' => true]));
+        static::assertStringContainsString(
+            'Removed the config cache at "data/cache/config-cache.php".',
+            $tester->getDisplay(),
+        );
+        static::assertFileDoesNotExist(self::CACHE_FILE);
+    }
+
+    #[Test]
+    public function testDisableRemovesTheConfigCacheWhenAlreadyDisabled(): void
+    {
+        // A cache outlives the toggle that produced it, so the already-disabled
+        // path has to drop it too.
+        $this->writeConfigCache();
+
+        $tester = $this->tester(configCachePath: self::CACHE_FILE);
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--disable' => true]));
+        static::assertStringContainsString(
+            'Development mode is already disabled.',
+            $tester->getDisplay(),
+        );
         static::assertStringContainsString(
             'Removed the config cache at "data/cache/config-cache.php".',
             $tester->getDisplay(),
@@ -193,27 +203,6 @@ final class DevelopmentModeCommandTest extends TestCase
     }
 
     #[Test]
-    public function testEnableLeavesAnAlreadyEnabledApplicationAlone(): void
-    {
-        file_put_contents(
-            filename: DevelopmentModeCommand::ACTIVE_FILE,
-            data    : 'existing active file',
-        );
-
-        $tester = $this->tester();
-
-        static::assertSame(Command::SUCCESS, $tester->execute(['--enable' => true]));
-        static::assertStringContainsString(
-            'Development mode is already enabled.',
-            $tester->getDisplay(),
-        );
-        static::assertSame(
-            'existing active file',
-            file_get_contents(filename: DevelopmentModeCommand::ACTIVE_FILE),
-        );
-    }
-
-    #[Test]
     public function testEnableRemovesTheAggregatedConfigCache(): void
     {
         $this->writeDistFile();
@@ -227,6 +216,33 @@ final class DevelopmentModeCommandTest extends TestCase
             $tester->getDisplay(),
         );
         static::assertFileDoesNotExist(self::CACHE_FILE);
+    }
+
+    #[Test]
+    public function testEnableRemovesTheConfigCacheWhenAlreadyEnabled(): void
+    {
+        file_put_contents(
+            filename: DevelopmentModeCommand::ACTIVE_FILE,
+            data    : 'existing active file',
+        );
+        $this->writeConfigCache();
+
+        $tester = $this->tester(configCachePath: self::CACHE_FILE);
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--enable' => true]));
+        static::assertStringContainsString(
+            'Development mode is already enabled.',
+            $tester->getDisplay(),
+        );
+        static::assertStringContainsString(
+            'Removed the config cache at "data/cache/config-cache.php".',
+            $tester->getDisplay(),
+        );
+        static::assertFileDoesNotExist(self::CACHE_FILE);
+        static::assertSame(
+            'existing active file',
+            file_get_contents(filename: DevelopmentModeCommand::ACTIVE_FILE),
+        );
     }
 
     #[Test]
