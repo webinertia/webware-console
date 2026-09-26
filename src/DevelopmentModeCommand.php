@@ -39,6 +39,9 @@ use const PHP_OS;
     name       : 'dev:mode',
     description: 'Enable, disable or report the application development mode',
 )]
+// One class holds the flag plumbing for five actions; splitting it would spread that
+// plumbing across more types than the separation is worth.
+// @mago-expect lint:too-many-methods
 final class DevelopmentModeCommand extends Command
 {
     /**
@@ -51,6 +54,7 @@ final class DevelopmentModeCommand extends Command
         'enable'        => 'Create the active file to enable development mode',
         'disable'       => 'Remove the active file to disable development mode',
         'status'        => 'Report whether development mode is currently enabled',
+        'clear-cache'   => 'Remove the aggregated config cache without changing the mode',
         'auto-composer' => 'Follow COMPOSER_DEV_MODE: enable on 1, disable on 0, do nothing otherwise',
     ];
 
@@ -97,6 +101,7 @@ final class DevelopmentModeCommand extends Command
             true === $input->getOption('enable') => $this->enable($output),
             true === $input->getOption('disable') => $this->disable($output),
             true === $input->getOption('status') => $this->status($output),
+            true === $input->getOption('clear-cache') => $this->clearCache($output),
             true === $input->getOption('auto-composer') => $this->autoComposer($output),
             default => $this->usage($output),
         };
@@ -132,18 +137,41 @@ final class DevelopmentModeCommand extends Command
     }
 
     /**
-     * Reports the cache removal only when a cache was really removed, so the
-     * output describes what happened rather than what was attempted.
+     * Removes the cache without touching the mode, so a stale cache can be dropped
+     * without toggling development mode off and on again.
      */
-    private function clearConfigCache(OutputInterface $output): void
+    private function clearCache(OutputInterface $output): int
     {
         $removed = $this->mode->clearConfigCache();
 
-        if (null === $removed) {
-            return;
+        if (null !== $removed) {
+            $output->writeln(sprintf('Removed the config cache at "%s".', $removed));
+
+            return Command::SUCCESS;
         }
 
-        $output->writeln(sprintf('Removed the config cache at "%s".', $removed));
+        // Nothing was removed: the cache is either gone already or stuck, and saying
+        // which is the difference between a helpful message and a wrong one.
+        if ($this->mode->hasConfigCache()) {
+            $this->error($output, 'Unable to remove the config cache.');
+
+            return Command::FAILURE;
+        }
+
+        $output->writeln('<comment>There is no config cache to remove.</comment>');
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Drops the cache as a side effect of a mode change, where a cache that was never
+     * there is not worth reporting.
+     */
+    private function clearConfigCache(OutputInterface $output): void
+    {
+        if (null !== ($removed = $this->mode->clearConfigCache())) {
+            $output->writeln(sprintf('Removed the config cache at "%s".', $removed));
+        }
     }
 
     private function disable(OutputInterface $output): int
@@ -188,6 +216,9 @@ final class DevelopmentModeCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * Writes a diagnostic, so the markup lives in one place.
+     */
     private function error(OutputInterface $output, string $message): void
     {
         $output->writeln(sprintf('<error>%s</error>', $message));
