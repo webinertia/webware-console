@@ -104,26 +104,46 @@ final class PromptKeyActionTest extends TestCase
     }
 
     #[Test]
-    public function testEnterAdvancesToTheNextField(): void
+    public function testEnterIgnoresBlankOptionalFields(): void
     {
-        $state = $this->state();
-
-        PromptKeyAction::enter($state);
-
-        static::assertSame(1, $state->activeIndex);
-        static::assertFalse($state->submitted);
-    }
-
-    #[Test]
-    public function testEnterOnTheLastFieldSubmitsWithoutAdvancing(): void
-    {
-        $state              = $this->state();
-        $state->activeIndex = 2;
+        $state = new PromptState([$this->field(FieldKind::Argument, '')]);
 
         PromptKeyAction::enter($state);
 
         static::assertTrue($state->submitted);
-        static::assertSame(2, $state->activeIndex);
+        static::assertFalse($state->refused);
+    }
+
+    #[Test]
+    public function testEnterRefusesAndFocusesTheFirstBlankRequiredField(): void
+    {
+        $state = new PromptState([
+            $this->field(FieldKind::Argument, 'filled', required: true),
+            $this->field(FieldKind::Argument, '', required: true),
+            $this->field(FieldKind::Option, '', required: true),
+        ]);
+
+        PromptKeyAction::enter($state);
+
+        static::assertFalse($state->submitted);
+        static::assertTrue($state->refused);
+        static::assertSame(1, $state->activeIndex);
+    }
+
+    #[Test]
+    public function testEnterSubmitsWhenEveryRequiredFieldIsFilled(): void
+    {
+        $state = new PromptState([
+            $this->field(FieldKind::Argument, 'first', required: true),
+            $this->field(FieldKind::Argument, 'second', required: true),
+        ]);
+        $state->activeIndex = 1;
+
+        PromptKeyAction::enter($state);
+
+        static::assertTrue($state->submitted);
+        static::assertFalse($state->refused);
+        static::assertSame(1, $state->activeIndex);
     }
 
     #[Test]
@@ -187,24 +207,15 @@ final class PromptKeyActionTest extends TestCase
         static::assertFalse($field->flagValue);
     }
 
-    private function field(FieldKind $kind, string|bool $default = ''): PromptField
+    private function field(FieldKind $kind, string|bool $default = '', bool $required = false): PromptField
     {
         return new PromptField(
             name       : 'field',
             description: '',
             kind       : $kind,
-            required   : false,
+            required   : $required,
             isArray    : false,
             default    : $default,
         );
-    }
-
-    private function state(): PromptState
-    {
-        return new PromptState([
-            $this->field(FieldKind::Argument, 'first'),
-            $this->field(FieldKind::Argument, 'second'),
-            $this->field(FieldKind::Argument, 'third'),
-        ]);
     }
 }

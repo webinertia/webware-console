@@ -19,6 +19,8 @@ use Webware\Console\ConsoleInterface;
 use function array_key_exists;
 use function count;
 use function explode;
+use function implode;
+use function in_array;
 use function sprintf;
 
 /**
@@ -66,9 +68,10 @@ final readonly class CommandInputPrompter
             $y      = $area->y + $index;
             $active = $index === $state->activeIndex;
 
-            $marker = $active ? '> ' : '  ';
-            $prefix = "{$marker}{$field->name}: ";
-            $style  = $active ? [Ansi\foreground(Color\bright_white())] : [];
+            $marker   = $active ? '> ' : '  ';
+            $required = $field->required ? '*' : ' ';
+            $prefix   = "{$marker}{$required} {$field->name}: ";
+            $style    = $active ? [Ansi\foreground(Color\bright_white())] : [];
 
             $buffer->setString(
                 x    : $area->x,
@@ -84,30 +87,32 @@ final readonly class CommandInputPrompter
                 self::INPUT_ROW_HEIGHT,
             );
 
-            if (FieldKind::Flag === $field->kind) {
-                $buffer->setString(
+            match ($field->kind) {
+                FieldKind::Flag => $buffer->setString(
                     x    : $inputArea->x,
                     y    : $y,
                     text : $field->flagValue ? '[x]' : '[ ]',
                     style: $style,
-                );
-
-                continue;
-            }
-
-            Widget\TextInput::new()
-                ->value($field->value)
-                ->cursor($field->cursor)
-                ->placeholder($field->description)
-                ->render($inputArea, $buffer);
+                ),
+                FieldKind::Argument, FieldKind::Option => Widget\TextInput::new()
+                    ->value($field->value)
+                    ->cursor($field->cursor)
+                    ->render($inputArea, $buffer),
+            };
         }
 
-        $footer = 'Tab/Down: next field   Up: previous field   Space: toggle checkbox   Enter: next/confirm   Esc: cancel';
+        $footer = 'Tab/Down: next field   Up: previous field   Space: toggle checkbox   Enter: execute   Esc: cancel';
 
         $buffer->setString(
             x   : $area->x,
             y   : $area->y + count($state->fields) + 1,
             text: $footer,
+        );
+
+        $buffer->setString(
+            x   : $area->x,
+            y   : $area->y + count($state->fields),
+            text: self::status($state),
         );
     }
 
@@ -138,6 +143,39 @@ final readonly class CommandInputPrompter
         }
 
         return $parameters;
+    }
+
+    /**
+     * The row between the last field and the key hints: the blank required
+     * fields once a submission has been refused, otherwise the active field's
+     * description — which has to stay visible even when the field already holds
+     * a value seeded from a declared default.
+     */
+    private static function status(PromptState $state): string
+    {
+        $missing = $state->refused ? $state->missingIndexes() : [];
+
+        $names = [];
+
+        foreach ($state->fields as $index => $field) {
+            if (! in_array(
+                needle  : $index,
+                haystack: $missing,
+                strict  : true,
+            )) {
+                continue;
+            }
+
+            $names[] = $field->name;
+        }
+
+        if ([] === $names) {
+            $active = $state->fields[$state->activeIndex] ?? null;
+
+            return null === $active ? '' : $active->description;
+        }
+
+        return sprintf('Required: %s', implode(', ', $names));
     }
 
     /**
