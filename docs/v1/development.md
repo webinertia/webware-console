@@ -31,7 +31,7 @@ mago guard      # architectural guards
 
 ## Development mode
 
-Development mode is the presence of `config/development.config.php`, a copy of the committed
+Development mode is the presence of `config/development.config.php`, linked from the committed
 `config/development.config.php.dist`. The config aggregator loads it last, so it turns the `debug`
 flag on and configuration caching off.
 
@@ -39,9 +39,13 @@ The console ships the command that toggles it, so a consumer needs no script of 
 
 ```bash
 php bin/webware dev:mode --status    # report whether development mode is enabled
-php bin/webware dev:mode --enable    # copy the dist file into place
+php bin/webware dev:mode --enable    # link the dist file into place
 php bin/webware dev:mode --disable   # remove the active file
+php bin/webware dev:mode --auto-composer   # follow COMPOSER_DEV_MODE
 ```
+
+The full behaviour contract, including every deliberate difference from
+`laminas/laminas-development-mode`, is in [`dev-mode.md`](dev-mode.md).
 
 Enabling and disabling both drop the aggregated config cache: a cache written while one state was in
 force is stale for the other, and development mode only means anything if config changes take effect

@@ -13,29 +13,25 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use function copy;
-use function file_exists;
+use function getenv;
 use function sprintf;
-use function unlink;
+use function var_export;
+
+use const PHP_OS;
 
 /**
  * Enables, disables and reports the application's development mode.
  *
- * Development mode is the presence of `config/development.config.php`, a copy of
- * the committed `config/development.config.php.dist`. The aggregator loads it
- * last, which turns the debug flag on and configuration caching off.
+ * The filesystem policy lives in {@see DevelopmentMode}; this class is only the CLI surface over
+ * it. Side effects therefore match `laminas/laminas-development-mode` — the dist files are linked
+ * rather than copied wherever symlinks are trusted, the optional
+ * `config/autoload/development.local.php` is placed by enable and removed by disable,
+ * COMPOSER_DEV_MODE is honoured, and both actions drop the aggregated config cache. Wording, flag
+ * interface and exit codes stay the console's own. `docs/v1/dev-mode.md` inventories every
+ * behaviour of the reference beside its disposition.
  *
- * Toggling it invalidates the aggregated configuration cache: a cache written
- * while one state was in force is stale for the other, and development mode only
- * means anything if config changes take effect immediately.
- *
- * The cache is dropped on every enable and disable, including when the requested
- * state is already in force. A surviving cache is authoritative - the aggregator
- * returns it without consulting a single provider - so leaving one behind is what
- * lets a stale state outlive the toggle that was meant to end it.
- *
- * Paths are relative to the working directory, which the console binary sets to
- * the project root before it builds the container.
+ * Paths are relative to the working directory, which the console binary sets to the project root
+ * before it builds the container.
  *
  * @api
  */
@@ -45,10 +41,6 @@ use function unlink;
 )]
 final class DevelopmentModeCommand extends Command
 {
-    public const string ACTIVE_FILE = 'config/development.config.php';
-
-    public const string DIST_FILE = 'config/development.config.php.dist';
-
     /**
      * Single source of truth for the flags: both the option definition and the
      * usage text are built from it, so they cannot drift apart.
@@ -56,19 +48,27 @@ final class DevelopmentModeCommand extends Command
      * @var array<string, string>
      */
     private const array ACTIONS = [
-        'enable'  => 'Copy the dist file to enable development mode',
-        'disable' => 'Remove the active file to disable development mode',
-        'status'  => 'Report whether development mode is currently enabled',
+        'enable'        => 'Create the active file to enable development mode',
+        'disable'       => 'Remove the active file to disable development mode',
+        'status'        => 'Report whether development mode is currently enabled',
+        'auto-composer' => 'Follow COMPOSER_DEV_MODE: enable on 1, disable on 0, do nothing otherwise',
     ];
+
+    private readonly DevelopmentMode $mode;
 
     /**
      * @param string|null $configCachePath The aggregated configuration's `config_cache_path`, if it declares one.
+     * @param string $platform The platform that decides link-versus-copy, injectable so both paths stay reachable.
      *
      * @throws LogicException
      */
-    public function __construct(
-        private readonly ?string $configCachePath = null,
-    ) {
+    public function __construct(?string $configCachePath = null, string $platform = PHP_OS)
+    {
+        $this->mode = new DevelopmentMode(
+            configCachePath: $configCachePath,
+            platform       : $platform,
+        );
+
         parent::__construct();
     }
 
@@ -97,68 +97,61 @@ final class DevelopmentModeCommand extends Command
             true === $input->getOption('enable') => $this->enable($output),
             true === $input->getOption('disable') => $this->disable($output),
             true === $input->getOption('status') => $this->status($output),
+            true === $input->getOption('auto-composer') => $this->autoComposer($output),
             default => $this->usage($output),
         };
     }
 
     /**
-     * Drops the aggregated configuration cache, which describes whichever state
-     * was in force when it was written.
+     * Follows `COMPOSER_DEV_MODE`, which Composer sets for the duration of an
+     * install or update, so development mode tracks the type of install.
      */
-    private function clearConfigCache(OutputInterface $output): void
+    private function autoComposer(OutputInterface $output): int
     {
-        if (null === $this->configCachePath || ! file_exists($this->configCachePath)) {
-            return;
+        $mode = getenv('COMPOSER_DEV_MODE');
+
+        if ('1' === $mode || '0' === $mode) {
+            return '1' === $mode ? $this->enable($output) : $this->disable($output);
         }
 
-        unlink($this->configCachePath);
+        if ('' === $mode || false === $mode) {
+            $output->writeln('<comment>COMPOSER_DEV_MODE not set. Nothing to do.</comment>');
 
-        $output->writeln(sprintf('Removed the config cache at "%s".', $this->configCachePath));
+            return Command::SUCCESS;
+        }
+
+        $this->error($output, sprintf(
+            'COMPOSER_DEV_MODE set to unexpected value (%s). Nothing to do.',
+            var_export(
+                value : $mode,
+                return: true,
+            ),
+        ));
+
+        return Command::FAILURE;
     }
 
     /**
-     * Copies the committed dist file over the active file.
-     *
-     * Reports its own failure, so the caller only decides the exit code.
+     * Reports the cache removal only when a cache was really removed, so the
+     * output describes what happened rather than what was attempted.
      */
-    private function copyDistFile(OutputInterface $output): bool
+    private function clearConfigCache(OutputInterface $output): void
     {
-        if (! file_exists(self::DIST_FILE)) {
-            $output->writeln(sprintf(
-                '<error>Dist file "%s" not found.</error>',
-                self::DIST_FILE,
-            ));
+        $removed = $this->mode->clearConfigCache();
 
-            return false;
+        if (null === $removed) {
+            return;
         }
 
-        if (! copy(self::DIST_FILE, self::ACTIVE_FILE)) {
-            $output->writeln(sprintf(
-                '<error>Unable to copy "%s" to "%s".</error>',
-                self::DIST_FILE,
-                self::ACTIVE_FILE,
-            ));
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private function developmentModeEnabled(): bool
-    {
-        return file_exists(self::ACTIVE_FILE);
+        $output->writeln(sprintf('Removed the config cache at "%s".', $removed));
     }
 
     private function disable(OutputInterface $output): int
     {
-        $enabled = $this->developmentModeEnabled();
+        $enabled = $this->mode->enabled();
 
-        if ($enabled && ! unlink(self::ACTIVE_FILE)) {
-            $output->writeln(sprintf(
-                '<error>Unable to remove "%s".</error>',
-                self::ACTIVE_FILE,
-            ));
+        if (null !== ($failure = $this->mode->disable())) {
+            $this->error($output, $failure);
 
             return Command::FAILURE;
         }
@@ -176,9 +169,11 @@ final class DevelopmentModeCommand extends Command
 
     private function enable(OutputInterface $output): int
     {
-        $enabled = $this->developmentModeEnabled();
+        $enabled = $this->mode->enabled();
 
-        if (! $enabled && ! $this->copyDistFile($output)) {
+        if (null !== ($failure = $this->mode->enable())) {
+            $this->error($output, $failure);
+
             return Command::FAILURE;
         }
 
@@ -193,10 +188,15 @@ final class DevelopmentModeCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function error(OutputInterface $output, string $message): void
+    {
+        $output->writeln(sprintf('<error>%s</error>', $message));
+    }
+
     private function status(OutputInterface $output): int
     {
         $output->writeln(
-            $this->developmentModeEnabled()
+            $this->mode->enabled()
                 ? '<info>Development mode is ENABLED.</info>'
                 : '<comment>Development mode is DISABLED.</comment>',
         );
@@ -210,8 +210,21 @@ final class DevelopmentModeCommand extends Command
         $output->writeln('Usage:');
 
         foreach (self::ACTIONS as $name => $description) {
-            $output->writeln(sprintf('  dev:mode --%-8s %s', $name, $description));
+            $output->writeln(sprintf('  dev:mode --%-13s %s', $name, $description));
         }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            'Enabling creates "%s" from "%s",',
+            DevelopmentMode::ACTIVE_FILE,
+            DevelopmentMode::DIST_FILE,
+        ));
+        $output->writeln(sprintf(
+            'and "%s" from "%s" when that file exists.',
+            DevelopmentMode::LOCAL_FILE,
+            DevelopmentMode::LOCAL_DIST,
+        ));
+        $output->writeln('Disabling removes both, and either action drops the aggregated config cache.');
 
         return Command::SUCCESS;
     }
