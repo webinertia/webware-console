@@ -70,7 +70,10 @@ final readonly class DevelopmentMode
             return null;
         }
 
-        unlink($path);
+        if (! unlink($path)) {
+            // Never report a removal that did not happen.
+            return null;
+        }
 
         return $path;
     }
@@ -127,6 +130,16 @@ final readonly class DevelopmentMode
     public function enabled(): bool
     {
         return file_exists(self::ACTIVE_FILE);
+    }
+
+    /**
+     * Whether the aggregated configuration cache is currently on disk.
+     */
+    public function hasConfigCache(): bool
+    {
+        $path = $this->configCachePath;
+
+        return null !== $path && file_exists($path);
     }
 
     /**

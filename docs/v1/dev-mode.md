@@ -37,6 +37,8 @@ Sources read in full to build this table: `src/Command.php`, `src/Help.php`,
 | 11 | Messages: `You are now in development mode.` / `Development mode is now disabled.` / `Already in development mode!` / `Development mode was already disabled.` / `Development mode is ENABLED` / `Development mode is DISABLED` | **DIVERGENCE — wording only.** The console keeps its own voice; the information conveyed is identical. |
 | 12 | `Status` reads exactly one thing: `file_exists('config/development.config.php')` — never the cache, never `.local` | replicate. The console additionally reports a cache removal **only when a file was actually removed**, so the output describes what happened rather than what was attempted. |
 
+| 13 | No cache-only action exists. The reference clears the cache only as a side effect of enable/disable, and the Mezzio skeleton ships a separate `bin/clear-config-cache.php` for the standalone case | **addition.** `--clear-cache` drops the cache and changes nothing else, so a stale cache can be cleared without toggling the mode off and on again. It reports three outcomes separately — removed, nothing to remove, and present but unremovable, which exits 1 to match the skeleton script — and the usage text documents it. |
+
 ## Where this lives
 
 | Class | Responsibility |

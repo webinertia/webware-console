@@ -40,6 +40,7 @@ use function unlink;
 #[CoversMethod(DevelopmentModeCommand::class, 'configure')]
 #[CoversMethod(DevelopmentModeCommand::class, 'execute')]
 #[CoversMethod(DevelopmentModeCommand::class, 'autoComposer')]
+#[CoversMethod(DevelopmentModeCommand::class, 'clearCache')]
 #[CoversMethod(DevelopmentModeCommand::class, 'clearConfigCache')]
 #[CoversMethod(DevelopmentModeCommand::class, 'disable')]
 #[CoversMethod(DevelopmentModeCommand::class, 'enable')]
@@ -51,6 +52,7 @@ use function unlink;
 #[CoversMethod(DevelopmentMode::class, 'disable')]
 #[CoversMethod(DevelopmentMode::class, 'enable')]
 #[CoversMethod(DevelopmentMode::class, 'enabled')]
+#[CoversMethod(DevelopmentMode::class, 'hasConfigCache')]
 #[CoversMethod(DevelopmentMode::class, 'place')]
 final class DevelopmentModeCommandTest extends TestCase
 {
@@ -125,6 +127,68 @@ final class DevelopmentModeCommandTest extends TestCase
         static::assertSame(Command::FAILURE, $tester->execute(['--auto-composer' => true]));
         static::assertStringContainsString(
             "COMPOSER_DEV_MODE set to unexpected value ('maybe'). Nothing to do.",
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
+    public function testClearCacheFailsWhenTheCacheCannotBeRemoved(): void
+    {
+        // A directory satisfies file_exists() but unlink() refuses it.
+        mkdir(
+            directory  : self::CACHE_FILE,
+            permissions: 0o777,
+            recursive  : true,
+        );
+
+        $tester = $this->tester(configCachePath: self::CACHE_FILE);
+
+        $status = $this->withoutWarnings(
+            static fn(): int => $tester->execute(['--clear-cache' => true]),
+        );
+
+        static::assertSame(Command::FAILURE, $status);
+        static::assertStringContainsString(
+            'Unable to remove the config cache.',
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
+    public function testClearCacheLeavesTheModeAlone(): void
+    {
+        file_put_contents(
+            filename: DevelopmentMode::ACTIVE_FILE,
+            data    : 'active file',
+        );
+        $this->writeConfigCache();
+
+        $tester = $this->tester(configCachePath: self::CACHE_FILE);
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--clear-cache' => true]));
+        static::assertStringContainsString(
+            'Removed the config cache at "data/cache/config-cache.php".',
+            $tester->getDisplay(),
+        );
+        // Falling through to the "nothing to remove" branch would exit 0 as well, so
+        // the absence of its message is part of what is being asserted.
+        static::assertStringNotContainsString(
+            'There is no config cache to remove.',
+            $tester->getDisplay(),
+        );
+        static::assertFileDoesNotExist(self::CACHE_FILE);
+        // The point of the flag: the mode itself is untouched.
+        static::assertFileExists(DevelopmentMode::ACTIVE_FILE);
+    }
+
+    #[Test]
+    public function testClearCacheReportsWhenThereIsNothingToRemove(): void
+    {
+        $tester = $this->tester(configCachePath: self::CACHE_FILE);
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--clear-cache' => true]));
+        static::assertStringContainsString(
+            'There is no config cache to remove.',
             $tester->getDisplay(),
         );
     }
@@ -476,6 +540,10 @@ final class DevelopmentModeCommandTest extends TestCase
         );
         static::assertStringContainsString(
             '  dev:mode --status        Report whether development mode is currently enabled',
+            $display,
+        );
+        static::assertStringContainsString(
+            '  dev:mode --clear-cache   Remove the aggregated config cache without changing the mode',
             $display,
         );
         // The contract block is separated from the flag list by a blank line.

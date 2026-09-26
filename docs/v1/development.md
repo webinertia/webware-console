@@ -41,6 +41,7 @@ The console ships the command that toggles it, so a consumer needs no script of 
 php bin/webware dev:mode --status    # report whether development mode is enabled
 php bin/webware dev:mode --enable    # link the dist file into place
 php bin/webware dev:mode --disable   # remove the active file
+php bin/webware dev:mode --clear-cache   # drop the config cache and nothing else
 php bin/webware dev:mode --auto-composer   # follow COMPOSER_DEV_MODE
 ```
 
