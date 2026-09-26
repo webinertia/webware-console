@@ -172,6 +172,21 @@ final class CommandInputPrompterTest extends TestCase
     }
 
     #[Test]
+    public function testOnKeyUpMovesBack(): void
+    {
+        $state = new PromptState([
+            $this->promptField(FieldKind::Argument),
+            $this->promptField(FieldKind::Argument),
+            $this->promptField(FieldKind::Argument),
+        ]);
+        $state->activeIndex = 1;
+
+        CommandInputPrompter::onKey(Event\Key::named('up'), $state);
+
+        static::assertSame(0, $state->activeIndex);
+    }
+
+    #[Test]
     public function testPromptCollectsValuesThroughTheKeyLoop(): void
     {
         $console = new FakeConsole()->withScripts([
@@ -184,11 +199,8 @@ final class CommandInputPrompterTest extends TestCase
                 Event\Key::named('backspace'),
                 Event\Key::named('tab'),
                 Event\Key::char('w'),
-                Event\Key::named('enter'),
                 Event\Key::named('tab'),
-                Event\Key::named('up'),
                 Event\Key::char(' '),
-                Event\Key::char('x'),
                 Event\Key::named('enter'),
             ],
         ]);
@@ -429,6 +441,44 @@ final class CommandInputPrompterTest extends TestCase
     }
 
     #[Test]
+    public function testRenderDoesNotMarkOptionalFieldsOrOptions(): void
+    {
+        $frame = $this->frame();
+
+        CommandInputPrompter::render($frame, new PromptState([
+            $this->namedField('suffix'),
+            $this->namedField('filter', kind: FieldKind::Option),
+        ]));
+
+        $text = $this->text($frame);
+
+        static::assertStringNotContainsString('*', $text);
+        static::assertStringContainsString('suffix:', $text);
+    }
+
+    #[Test]
+    public function testRenderDoesNotReportRequiredFieldsBeforeASubmission(): void
+    {
+        $frame = $this->frame();
+
+        CommandInputPrompter::render($frame, new PromptState([
+            $this->namedField('configFile', required: true, description: 'Config file to read.'),
+        ]));
+
+        static::assertSame('Config file to read.', $this->row($frame, 1));
+    }
+
+    #[Test]
+    public function testRenderDrawsAnEmptyStatusRowWhenThereAreNoFields(): void
+    {
+        $frame = $this->frame();
+
+        CommandInputPrompter::render($frame, new PromptState([]));
+
+        static::assertSame('', $this->row($frame, 0));
+    }
+
+    #[Test]
     public function testRenderDrawsTheFooter(): void
     {
         $frame = $this->frame();
@@ -438,6 +488,20 @@ final class CommandInputPrompterTest extends TestCase
         ]));
 
         static::assertStringContainsString('Tab/Down: next field', $this->text($frame));
+    }
+
+    #[Test]
+    public function testRenderDropsTheReportOnceTheRequiredFieldsAreFilled(): void
+    {
+        $state = new PromptState([
+            $this->namedField('configFile', 'ok', required: true, description: 'Config file to read.'),
+        ]);
+        $state->refused = true;
+
+        $frame = $this->frame();
+        CommandInputPrompter::render($frame, $state);
+
+        static::assertSame('Config file to read.', $this->row($frame, 1));
     }
 
     #[Test]
@@ -451,10 +515,21 @@ final class CommandInputPrompterTest extends TestCase
 
         $frame = $this->frame();
         CommandInputPrompter::render($frame, $state);
-        $text = $this->text($frame);
 
-        static::assertStringContainsString('  field:', $text);
-        static::assertStringContainsString('> field:', $text);
+        static::assertStringStartsWith('  ', $this->row($frame, 0));
+        static::assertStringStartsWith('> ', $this->row($frame, 1));
+    }
+
+    #[Test]
+    public function testRenderMarksRequiredArguments(): void
+    {
+        $frame = $this->frame();
+
+        CommandInputPrompter::render($frame, new PromptState([
+            $this->namedField('configFile', 'ok', required: true),
+        ]));
+
+        static::assertStringStartsWith('> * configFile: ok', $this->row($frame, 0));
     }
 
     #[Test]
@@ -466,10 +541,8 @@ final class CommandInputPrompterTest extends TestCase
             $this->promptField(FieldKind::Argument, 'hello'),
         ]));
 
-        $text = $this->text($frame);
-
-        static::assertStringContainsString('> field:', $text);
-        static::assertStringContainsString('hello', $text);
+        static::assertStringStartsWith('> ', $this->row($frame, 0));
+        static::assertStringContainsString('hello', $this->text($frame));
     }
 
     #[Test]
@@ -483,6 +556,22 @@ final class CommandInputPrompterTest extends TestCase
 
         static::assertStringContainsString('Tab/Down: next field', $this->row($frame, 2));
         static::assertStringNotContainsString('Tab/Down: next field', $this->row($frame, 1));
+    }
+
+    #[Test]
+    public function testRenderReportsTheBlankRequiredFieldsWhenARefusalHappened(): void
+    {
+        $state = new PromptState([
+            $this->namedField('configFile', 'ok', required: true, description: 'Config file to read.'),
+            $this->namedField('class', required: true, description: 'Class to generate.'),
+            $this->namedField('suffix'),
+        ]);
+        $state->refused = true;
+
+        $frame = $this->frame();
+        CommandInputPrompter::render($frame, $state);
+
+        static::assertSame('Required: class', $this->row($frame, 3));
     }
 
     #[Test]
@@ -513,6 +602,18 @@ final class CommandInputPrompterTest extends TestCase
 
         static::assertStringContainsString('[ ]', $text);
         static::assertStringNotContainsString('[x]', $text);
+    }
+
+    #[Test]
+    public function testRenderShowsTheActiveFieldDescriptionOverAPopulatedValue(): void
+    {
+        $frame = $this->frame();
+
+        CommandInputPrompter::render($frame, new PromptState([
+            $this->namedField('version', 'abc', description: 'Version to migrate to.'),
+        ]));
+
+        static::assertSame('Version to migrate to.', $this->row($frame, 1));
     }
 
     #[Test]
@@ -669,6 +770,23 @@ final class CommandInputPrompterTest extends TestCase
                 width : 40,
                 height: 10,
             ),
+        );
+    }
+
+    private function namedField(
+        string $name,
+        string|bool $default = '',
+        bool $required = false,
+        string $description = '',
+        FieldKind $kind = FieldKind::Argument,
+    ): PromptField {
+        return new PromptField(
+            name       : $name,
+            description: $description,
+            kind       : $kind,
+            required   : $required,
+            isArray    : false,
+            default    : $default,
         );
     }
 

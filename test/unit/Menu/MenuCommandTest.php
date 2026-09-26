@@ -58,6 +58,24 @@ final class MenuCommandTest extends TestCase
     }
 
     #[Test]
+    public function testExecuteRefusesABlankRequiredArgumentInsteadOfRunning(): void
+    {
+        $console = new FakeConsole()->withScripts([
+            [Event\Key::named('enter')],
+            [Event\Key::named('enter')],
+            [Event\Key::char('f'), Event\Key::named('enter')],
+            [Event\Key::named('ctrl+c')],
+        ]);
+
+        $status = $this->buildCommand($console)->run(new ArrayInput([]), new NullOutput());
+
+        static::assertSame(Command::SUCCESS, $status);
+        static::assertStringContainsString('Required: name', $this->text($console->frames()[1]));
+        // menu, refused prompt, submitted prompt, result — the first Enter ran nothing.
+        static::assertSame(4, $console->runCount);
+    }
+
+    #[Test]
     public function testExecuteReturnsSuccessWhenQuit(): void
     {
         $console = new FakeConsole()->withScripts([
@@ -89,7 +107,7 @@ final class MenuCommandTest extends TestCase
     {
         $console = new FakeConsole()->withScripts([
             [Event\Key::named('h'), Event\Key::named('down'), Event\Key::named('enter')],
-            [Event\Key::named('enter')],
+            [Event\Key::char('f'), Event\Key::named('enter')],
             [Event\Key::named('ctrl+c')],
         ]);
 

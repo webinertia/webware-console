@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Webware\Console\Test\Unit\Prompt;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Webware\Console\Prompt\FieldKind;
@@ -12,6 +13,7 @@ use Webware\Console\Prompt\PromptField;
 use Webware\Console\Prompt\PromptState;
 
 #[CoversClass(PromptState::class)]
+#[CoversMethod(PromptState::class, 'missingIndexes')]
 final class PromptStateTest extends TestCase
 {
     #[Test]
@@ -44,6 +46,54 @@ final class PromptStateTest extends TestCase
         static::assertSame(2, $state->activeIndex);
     }
 
+    #[Test]
+    public function testMissingIndexesIgnoresBlankOptionalFields(): void
+    {
+        $state = new PromptState([
+            $this->requiredField('required-filled', 'value'),
+            $this->requiredField('required-blank', ''),
+            $this->optionalField('optional-blank'),
+        ]);
+
+        static::assertSame([1], $state->missingIndexes());
+    }
+
+    #[Test]
+    public function testMissingIndexesIsEmptyWhenNoFieldIsRequired(): void
+    {
+        $state = new PromptState([$this->optionalField('optional')]);
+
+        static::assertSame([], $state->missingIndexes());
+    }
+
+    #[Test]
+    public function testMissingIndexesIsEmptyWhenRequiredFieldsAreFilled(): void
+    {
+        $state = new PromptState([
+            $this->requiredField('first', 'value'),
+            $this->requiredField('second', 'value'),
+        ]);
+
+        static::assertSame([], $state->missingIndexes());
+    }
+
+    #[Test]
+    public function testMissingIndexesReportsEveryBlankRequiredField(): void
+    {
+        $state = new PromptState([
+            $this->requiredField('blank-first', ''),
+            $this->requiredField('blank-second', ''),
+        ]);
+
+        static::assertSame([0, 1], $state->missingIndexes());
+    }
+
+    #[Test]
+    public function testRefusedStartsFalse(): void
+    {
+        static::assertFalse(new PromptState([])->refused);
+    }
+
     /**
      * @return list<PromptField>
      */
@@ -62,5 +112,28 @@ final class PromptStateTest extends TestCase
         }
 
         return $fields;
+    }
+
+    private function optionalField(string $name): PromptField
+    {
+        return new PromptField(
+            name       : $name,
+            description: '',
+            kind       : FieldKind::Option,
+            required   : false,
+            isArray    : false,
+        );
+    }
+
+    private function requiredField(string $name, string $value): PromptField
+    {
+        return new PromptField(
+            name       : $name,
+            description: '',
+            kind       : FieldKind::Argument,
+            required   : true,
+            isArray    : false,
+            default    : $value,
+        );
     }
 }

@@ -26,6 +26,7 @@ Versioned documentation lives under [`docs/`](docs/):
 - [Installation](docs/v1/installation.md)
 - [Quickstart](docs/v1/quickstart.md)
 - [Command discovery](docs/v1/command-discovery.md)
+- [Command input](docs/v1/command-input.md)
 - [Configuration](docs/v1/configuration.md)
 - [Development](docs/v1/development.md)
 

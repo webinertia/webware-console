@@ -6,7 +6,6 @@ namespace Webware\Console\Prompt;
 
 use Psl\Terminal\Event;
 
-use function count;
 use function mb_substr;
 
 /**
@@ -49,15 +48,16 @@ final readonly class PromptKeyAction
 
     public static function enter(PromptState $state): void
     {
-        $count = count($state->fields);
+        $missing = $state->missingIndexes();
 
-        if ($state->activeIndex === ($count - 1)) {
+        if ([] === $missing) {
             $state->submitted = true;
 
             return;
         }
 
-        $state->activeIndex++;
+        $state->refused     = true;
+        $state->activeIndex = $missing[0];
     }
 
     public static function left(PromptField $field): void
