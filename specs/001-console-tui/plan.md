@@ -53,7 +53,7 @@ No violations requiring justification.
 
 ## Design Decisions — command input machinery (issue #31)
 
-Added 2026-09-25. Implements FR-009…FR-013. The defects these address are recorded in issue #31;
+Added 2026-09-25. Implements FR-009…FR-012. The defects these address are recorded in issue #31;
 this section is the design record for the fixes.
 
 ### Prompt layout and the key contract
@@ -76,7 +76,7 @@ y + count + 1   footer — key hints
 | `Up` | previous field (wraps) |
 | `Space` | toggle a flag field |
 | `Left`, `Right`, `Backspace`, printable | edit the active text field |
-| `Enter` | submit — refused if any required field is blank |
+| `Enter` | execute — refused if any required field is blank |
 | `Esc` | cancel, back to the menu |
 
 Enter no longer advances the active index; navigation keeps its own keys, so the overload
@@ -93,9 +93,10 @@ with `required === true` holds a non-empty value", evaluated when Enter is press
 On refusal the console MUST NOT run the command and MUST NOT pass `''`. Today a blank required
 argument is passed as an empty string, which Symfony accepts as a supplied value, so the failure
 surfaces deep inside the command instead of the prompt naming what is missing — `mezzio:handler:create`
-would generate a class named the empty string. The state records the offending field names for
-the status row and moves the active index to the first of them; every value already entered is
-preserved.
+would generate a class named the empty string. The state records that a submission was refused and
+moves the active index to the first blank required field; the report itself is computed from the
+current field values each time the row is drawn, so it shrinks as the operator fills the fields in
+rather than going stale. Every value already entered is preserved.
 
 `toParameters()` keeps omitting blank *optional* fields — Symfony then applies its own default,
 which is the existing and correct behaviour.
@@ -109,41 +110,77 @@ description therefore moves off the placeholder entirely and onto the status row
 active field whatever its value. A pending refusal message takes precedence over it, so one row
 carries both meanings and the form does not grow.
 
-### Wrapped commands that ask their own questions
+### Requiredness, and the asterisk marker
 
-`CommandRunner` runs the command with a `BufferedOutput`. `QuestionHelper` writes the question to
-the *output* and then blocks reading STDIN, so the question lands in a buffer that is never
-flushed while the terminal waits — the console looks hung with the question invisible. Terminal
-state is not the cause: `Psl\Terminal\Application::run()` restores raw mode and resets the
-alternate screen in its `finally`, as part of the TUI teardown, so the terminal is already normal
-by the time the command runs.
+Requiredness is declared on **arguments only**. Symfony's `InputOption` has no required concept at
+all — its modes only describe whether a value is accepted — while `InputArgument` carries
+`REQUIRED = 1`, `OPTIONAL = 2`, `IS_ARRAY = 4`. The console therefore reads requiredness from
+`$argument->isRequired()` and from nowhere else, and marks every required argument with an
+asterisk in its field label:
 
-**Decision — hand the command its terminal back while still capturing.** The runner writes the
-command's formatted output to STDOUT *and* accumulates the same bytes for the result screen.
-`MirroringOutput` extends `BufferedOutput` and calls `parent::doWrite()` (byte-identical capture)
-before writing the same already-formatted message to the stream. Decoration stays off, so the
-captured text is unchanged from today.
+```text
+> * configFile: <value>
+    class: <value>
+  --ignore-unresolved: [ ]
+```
 
-Consequences:
+That is why `dev:mode` shows none (three `VALUE_NONE` flags, and options are never required) while
+`mezzio:handler:create` shows one (`handler` is `InputArgument::REQUIRED`). The marker exists so
+the operator can see what is mandatory without going back and forth to the command's docs or
+code — the complaint that started this work.
 
-- every wrapped command keeps its captured output and `CommandRunner::run()` keeps its
-  `array{status: int, output: string}` contract (FR-013);
-- a command that asks questions has them shown and answerable, with no change to the command and
-  none in webware-usermanager (FR-012) — `user:init-db` keeps working exactly as written;
-- Symfony's own question features work unmodified rather than being reimplemented:
-  `setHidden(true)` password masking, `ChoiceQuestion` defaults, validators, autocomplete;
-- the operator sees the command's output live and then again on the result screen. That
-  duplication is the accepted cost of a design that cannot know in advance whether a command will
-  prompt.
+A command that needs a mandatory value must declare it as a required argument. A value declared as
+an option with a `?? $helper->ask(...)` fallback states its requirement in control flow, where
+nothing outside the class can see it — which is exactly `user:init-db`'s situation today.
 
-**Why not a TUI-native question helper.** `Application::getDefaultHelperSet()` does register
-`QuestionHelper` under the name `question`, and `Command::getHelper()` resolves through the
-Application's `HelperSet`, so substituting our own helper would intercept commands that call
-`$this->getHelper('question')`. It cannot be sufficient, however: `user:init-db` constructs its
-own (`$helper = new QuestionHelper();`, `InitDbCommand.php:143`), and any third-party command may
-do the same. Reimplementing choice/hidden/validator semantics in the TUI would also trade tested
-library behaviour for bespoke code that silently degrades on any question kind we did not cover.
-It remains available later as a presentation refinement layered on top of this floor.
+### Cross-repository change: `user:init-db`
+
+`user:init-db` (webware-usermanager) requires first name, last name, email and password — a user
+must be created — but declares all four as optional options and asks for them inside `execute()`.
+The console cannot see that, so it cannot mark or validate them. The fix belongs to that component
+and is its own PR there:
+
+- declare the four as `InputArgument::REQUIRED`;
+- move the prompting into `interact()`, filling the arguments with `setArgument()`.
+
+`Command::run()` runs `bind()` → `initialize()` → **`interact()`** → **`validate()`** →
+`execute()`, and `interact()`'s own docblock says it "is executed before the InputDefinition is
+validated. This means that this is the only place where the command can interactively ask for
+values of missing required arguments." Direct CLI use therefore keeps prompting exactly as it does
+today, while the definition now tells the console the values are mandatory. `--role` keeps its
+`developer` default; `--drop` stays a flag.
+
+The console needs no new machinery for this — `*` and validate-on-Enter already read
+`isRequired()`. The two changes are independent and the console work does not wait on this one.
+
+### Out of scope: a command's own interactive questions
+
+The console does not display a command's own interactive questions, and this work does not change
+that. It wraps commands whose input the command declares; a command that asks its own questions is
+left as it is.
+
+The hazard is real but narrow, and it lives in our own components. `CommandRunner` gives the
+command a `BufferedOutput`, so `QuestionHelper::writePrompt()` writes into a buffer nobody flushes
+and `fgets(STDIN)` then blocks with nothing on screen. It is reachable only when a value the
+command consults with `??` is neither declared nor filled — for `user:init-db`, one of the four
+value options left blank. Declaring them as required arguments removes the case that matters, and
+the console's form then validates them like any other required field.
+
+Terminal state was never the cause: `Psl\Terminal\Application::run()` restores raw mode and resets
+the alternate screen in its `finally`, so the terminal is normal by the time the command runs.
+
+Two remedies were evaluated and rejected for this scope: handing the command the terminal, and
+substituting the Application's `question` helper so questions render in the TUI. Neither is needed
+once requiredness is declared, and helper substitution could never be sufficient on its own — it
+only sees commands that call `$this->getHelper('question')`, while `user:init-db` constructs its
+own.
+
+### Implementation conventions
+
+- **Conditional dispatch uses `match`, not chained `if` statements.** Key handling, the submit /
+  refuse step and the status-row selection are each a discrete selection over a known set of
+  cases, so they are written as `match` expressions. This applies to new code and to code being
+  touched, and matches the precedent already set by `CommandInputPrompter::onKey()`.
 
 ## Project Structure
 
@@ -176,8 +213,7 @@ src/
 │   ├── PromptKeyAction.php          # per-key behaviour, incl. the submit/validate step
 │   └── PromptState.php              # active field, submission, cancellation, missing-required list
 ├── Runner/
-│   ├── CommandRunner.php            # invoke command, capture output + status
-│   └── MirroringOutput.php          # write output through to the terminal and capture it
+│   └── CommandRunner.php            # invoke command, capture output + status
 ├── Container/                       # CommandLoaderFactory, ApplicationFactory, MenuCommandFactory
 ├── Exception/                       # DuplicateCommandException
 └── ConfigProvider.php               # DI wiring
@@ -205,9 +241,8 @@ test/
 Discovery is lazy — components register commands under the `ConsoleInterface::class`
 config key, and `CommandLoaderFactory` merges `config['laminas-cli']['commands']`
 into a Symfony `ContainerCommandLoader` (no command is instantiated until invoked).
-The menu/help/prompt/runner are presentation and invocation layers. The runner writes a command's
-output through to the terminal as well as capturing it, so a command that asks questions of its
-own stays usable from the console. No persistence layer — the TUI is stateless.
+The menu/help/prompt/runner are presentation and invocation layers. No persistence
+layer — the TUI is stateless.
 
 ## Complexity Tracking
 

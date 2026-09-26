@@ -116,38 +116,47 @@
 
 ## Phase 8: Command input machinery (issue #31)
 
-**Goal**: a wrapped command can be driven to completion from the menu — submitted from any field,
-validated before it runs, with its help text visible and its own questions answerable.
+**Goal**: a wrapped command can be driven to completion from the menu — executed from any field,
+validated before it runs, with what is required visible up front and its help text on screen.
 
-**Independent Test**: drive `servicemanager:generate-deps-for-config-factory` (3 fields, 2 required)
-through the menu in a scratch project, then drive a command that asks its own questions.
+**Independent Test**: drive `dev:mode` (the reported failure) and
+`servicemanager:generate-deps-for-config-factory` (3 fields, 2 required) through the menu.
 
 **Why this phase exists**: the machinery had never been exercised against a multi-field wrapped
 command. `acl:init-db` (1 field) and `user:init-db` (6, filled in order) hid Findings 1 and 2;
 `dev:mode`'s flag in the middle of its list is where the habit broke. Both findings affect every
 command driven through the menu, not only `dev:mode`.
 
+**Scope note**: the console does not display a wrapped command's own interactive questions. That
+was evaluated and is deliberately out of scope — see `plan.md`, "Out of scope: a command's own
+interactive questions".
+
 ### Tests for Phase 8
 
-- [ ] T029 [P] [US3] Unit test submission from any field in `test/unit/Prompt/PromptKeyActionTest.php` — Enter on a middle field with every required field filled submits, and Enter no longer advances the active index
-- [ ] T030 [P] [US3] Unit test the refusal path — blank required fields are recorded by name in `PromptState::$missingRequired`, the active index moves to the first of them, nothing is submitted, and values already entered survive
-- [ ] T031 [P] [US3] Unit test the status row in `test/unit/Prompt/CommandInputPrompterTest.php` — the active field's description renders at `y + count` even when the field holds a value seeded from a default, a refusal message takes precedence, and the description is no longer passed as the placeholder
-- [ ] T032 [P] [US3] Unit test `MirroringOutput` — the captured text is byte-identical to `BufferedOutput`'s for the same writes, and the same bytes reach the stream
+- [ ] T029 [P] [US3] Unit test execution from any field in `test/unit/Prompt/PromptKeyActionTest.php` — Enter on a middle field with every required field filled executes, and Enter no longer advances the active index
+- [ ] T030 [P] [US3] Unit test the refusal path — a blank required field sets `PromptState::$refused`, moves the active index to the first blank required field, executes nothing, and leaves entered values intact
+- [ ] T031 [P] [US3] Unit test the status row in `test/unit/Prompt/CommandInputPrompterTest.php` — the active field's description renders at `y + count` even when the field holds a value seeded from a default, a refusal report takes precedence, and the description is no longer passed as the placeholder
+- [ ] T032 [P] [US3] Unit test the required-field report — blank required fields are named in declaration order, a blank optional field is not named, and the report shrinks as values are filled in
+- [ ] T033 [P] [US3] Unit test the asterisk marker — a required argument's label carries `*`; an optional argument's and every option's does not
 
 ### Implementation for Phase 8
 
-- [ ] T033 [US3] Add `missingRequired` to `PromptState` and replace `PromptKeyAction::enter()`'s positional advance with the submit-or-refuse step (FR-009/FR-010)
-- [ ] T034 [US3] Render the status row at `y + count` in `CommandInputPrompter::render()` and stop passing the description as the placeholder (FR-011)
-- [ ] T035 [US3] Re-word the footer to the new key contract: `Tab/Down: next field   Up: previous field   Space: toggle checkbox   Enter: submit   Esc: cancel`
-- [ ] T036 [US3] Add `src/Runner/MirroringOutput.php` and run commands through it, so a wrapped command's own questions are shown and answerable while its output stays captured (FR-012/FR-013)
-- [ ] T037 [US3] Wire `CommandRunner` through a container factory so the live stream is injected rather than referenced statically
+- [ ] T034 [US3] Add `refused` and the missing-required lookup to `PromptState`, and replace `PromptKeyAction::enter()`'s positional advance with the execute-or-refuse step (FR-009/FR-010)
+- [ ] T035 [US3] Render the status row at `y + count` in `CommandInputPrompter::render()` and stop passing the description as the placeholder (FR-011)
+- [ ] T036 [US3] Mark required arguments with `*` in the field label (FR-012)
+- [ ] T037 [US3] Re-word the footer to the new key contract: `Tab/Down: next field   Up: previous field   Space: toggle checkbox   Enter: execute   Esc: cancel`
 - [ ] T038 [US3] Integration test: a multi-field command is driven through the prompter end to end
-- [ ] T039 [P] Document the prompt key contract and the wrapped-command prompting behaviour in `docs/v1/`
+- [ ] T039 [P] Document the prompt key contract, the asterisk marker and the requiredness rule in `docs/v1/`
+
+### Cross-repository work — webware-usermanager (separate PR)
+
+- [ ] T040 [US3] Declare `user:init-db`'s `first-name`, `last-name`, `email` and `password` as `InputArgument::REQUIRED` and move its prompting into `interact()`, so the console can mark and validate them; `--role` keeps its `developer` default and `--drop` stays a flag
+- [ ] T041 [US3] Cover `interact()` — arguments filled when absent and left alone when supplied — and confirm `bin/webware user:init-db` still prompts when run with no arguments
 
 ### Verification for Phase 8
 
-- [ ] T040 Walk the menu against `servicemanager:generate-deps-for-config-factory` in a scratch project (3 fields, 2 required, writes files) and against a command that prompts, confirming its questions are shown and answerable
-- [ ] T041 Run `mago format`/`lint`/`analyze`/`guard` and `composer test` + `composer test-integration`, closing coverage to 100% line + mutation
+- [ ] T042 Walk the menu against `dev:mode` (the reported failure), `servicemanager:generate-deps-for-config-factory` in a scratch project (3 fields, 2 required, writes files), and `mezzio:routes:list` for the help text on defaulted fields
+- [ ] T043 Run `mago format`/`lint`/`analyze`/`guard` and `composer test` + `composer test-integration`, closing coverage to 100% line + mutation
 
 ## Dependencies & Execution Order
 
@@ -193,8 +202,10 @@ US1 → US2 (help) → US3 (run) → US4 (discovery) → Polish.
 - Generic CLI host with zero migration knowledge; webware-migration depends on this package (one-way: migration → console).
 - Discovery goes through the `ConsoleInterface::class` config key; `CommandLoaderFactory` merges `config['laminas-cli']['commands']` (mezzio-tooling's key) into a lazy `ContainerCommandLoader`.
 - The console presents/invokes commands; it does not reimplement command logic.
-- T029–T041 were appended 2026-09-25 for issue #31; no completed task (T001–T026) was rewritten.
-- A wrapped command that asks questions of its own is supported by handing it the terminal while
-  still capturing its output — see `plan.md`, "Design Decisions — command input machinery".
+- T029–T043 were appended 2026-09-25 for issue #31; no completed task (T001–T026) was rewritten.
+- Requiredness is read from the command's own definition and is declarable on arguments only, so the
+  form marks required fields with `*` — see `plan.md`, "Design Decisions — command input machinery".
+- T040/T041 land in **webware-usermanager**, not this repository.
+- New and touched code uses `match` for conditional dispatch rather than chained `if` statements.
 - Commit after each task or group; squash-merge PRs to `1.0.x`.
 - Commit author MUST be `Joey Smith <jsmith@webinertia.net>`.

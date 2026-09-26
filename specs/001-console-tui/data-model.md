@@ -35,7 +35,7 @@ One argument or option of the selected command, rendered as an editable field.
 - `name`: string — the argument name, or the option name without its `--` prefix.
 - `description`: string — the help text shown on the status row while this field is active.
 - `kind`: `Argument` | `Option` | `Flag` — flags are toggled with `Space`; the others are typed.
-- `required`: bool — `true` only for arguments declared required; options are never required.
+- `required`: bool — `true` only for arguments declared required; options are never required. Drives the asterisk in the field label and the check made when Enter is pressed.
 - `isArray`: bool — a comma-separated value becomes a list when the command's input is built.
 - `value`: string — seeded from the declared default.
 - `flagValue`: bool — seeded from a boolean default.
@@ -47,14 +47,15 @@ One argument or option of the selected command, rendered as an editable field.
 - `activeIndex`: int — wraps modulo the field count.
 - `submitted`: bool.
 - `cancelled`: bool.
-- `missingRequired`: list<string> — the names of the blank required fields from the last refused submission; empty while the form is valid.
+- `refused`: bool — whether a submission has been refused, so the blank required fields are reported until they are filled in; once they are, the row goes back to the active field's description.
 
 ### PromptStatusRow (derived, on demand)
 
 The single row between the last field and the footer.
 
-- Shows the refusal message when `missingRequired` is non-empty, otherwise the active field's description.
-- Precedence: the refusal message wins.
+- Reports the blank required fields while `refused` is set and any remain blank; otherwise shows the active field's description.
+- The report is derived from the current field values on each draw, so it shrinks as the operator fills the fields in rather than going stale.
+- Precedence: the refusal report wins over the description.
 
 ## Relationships
 
@@ -75,5 +76,7 @@ The single row between the last field and the footer.
 - An empty command set is valid (FR-007); the console still launches and reports it.
 - After a command runs or fails, the menu MUST return to a valid `MenuState` (FR-008).
 - Submission is accepted only while every field with `required === true` holds a non-empty value (FR-009/FR-010).
+- Every field with `required === true` is marked with an asterisk, so the requirement is visible before submission (FR-012).
+- Requiredness comes from the command's definition and from nothing else; an option is never marked or treated as required, because Symfony cannot declare it so.
 - A refused submission MUST run nothing, name the blank required fields, focus the first of them, and preserve every value already entered.
 - Fields that are not required and left blank are omitted from the command's input, so the command's own default applies rather than an empty value being passed.

@@ -50,10 +50,9 @@ Validation guide — proves the feature end-to-end. Implementation details belon
 
     **Expected**: the field's description is visible even though the field is already populated.
 
-11. Run a command that asks its own questions.
+11. Open a command that declares a required argument.
 
-    **Expected**: each question is shown and can be answered; the command completes and its output
-    and status are shown.
+    **Expected**: that field is marked with an asterisk, and the command's optional fields are not.
 
 ## Success
 

@@ -30,10 +30,10 @@ The console's own interface.
 The row between the last field and the key hints shows the active field's description, or the
 refusal message when a submission was refused.
 
-## Commands that ask their own questions
+## Required input
 
-- A command may ask questions of its own. Those questions are shown to the operator and answerable from the console.
-- A command's questions are never answered with defaults on the operator's behalf.
+- A field the command declares as required is marked with an asterisk in the form.
+- Requiredness is taken only from the command's own definition. A value declared as an option is never treated as required, because Symfony cannot declare an option required.
 ## Exit
 
 - The console itself exits cleanly with status 0 when quit.
