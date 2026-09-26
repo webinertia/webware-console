@@ -14,6 +14,7 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Webware\Console\Container\DevelopmentModeCommandFactory;
+use Webware\Console\DevelopmentMode;
 use Webware\Console\DevelopmentModeCommand;
 
 use function bin2hex;
@@ -139,7 +140,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
         chdir(directory: $this->projectRoot);
 
         file_put_contents(
-            filename: DevelopmentModeCommand::DIST_FILE,
+            filename: DevelopmentMode::DIST_FILE,
             data    : 'dist contents',
         );
         file_put_contents(

@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Webware\Console\DevelopmentMode;
 use Webware\Console\DevelopmentModeCommand;
 
 use function bin2hex;
@@ -20,7 +21,9 @@ use function file_get_contents;
 use function file_put_contents;
 use function getcwd;
 use function is_dir;
+use function is_link;
 use function mkdir;
+use function putenv;
 use function random_bytes;
 use function restore_error_handler;
 use function rmdir;
@@ -32,16 +35,23 @@ use function sys_get_temp_dir;
 use function unlink;
 
 #[CoversClass(DevelopmentModeCommand::class)]
+#[CoversClass(DevelopmentMode::class)]
 #[CoversMethod(DevelopmentModeCommand::class, '__construct')]
 #[CoversMethod(DevelopmentModeCommand::class, 'configure')]
 #[CoversMethod(DevelopmentModeCommand::class, 'execute')]
-#[CoversMethod(DevelopmentModeCommand::class, 'enable')]
+#[CoversMethod(DevelopmentModeCommand::class, 'autoComposer')]
+#[CoversMethod(DevelopmentModeCommand::class, 'clearConfigCache')]
 #[CoversMethod(DevelopmentModeCommand::class, 'disable')]
+#[CoversMethod(DevelopmentModeCommand::class, 'enable')]
+#[CoversMethod(DevelopmentModeCommand::class, 'error')]
 #[CoversMethod(DevelopmentModeCommand::class, 'status')]
 #[CoversMethod(DevelopmentModeCommand::class, 'usage')]
-#[CoversMethod(DevelopmentModeCommand::class, 'clearConfigCache')]
-#[CoversMethod(DevelopmentModeCommand::class, 'copyDistFile')]
-#[CoversMethod(DevelopmentModeCommand::class, 'developmentModeEnabled')]
+#[CoversMethod(DevelopmentMode::class, '__construct')]
+#[CoversMethod(DevelopmentMode::class, 'clearConfigCache')]
+#[CoversMethod(DevelopmentMode::class, 'disable')]
+#[CoversMethod(DevelopmentMode::class, 'enable')]
+#[CoversMethod(DevelopmentMode::class, 'enabled')]
+#[CoversMethod(DevelopmentMode::class, 'place')]
 final class DevelopmentModeCommandTest extends TestCase
 {
     private const string CACHE_FILE = 'data/cache/config-cache.php';
@@ -51,10 +61,79 @@ final class DevelopmentModeCommandTest extends TestCase
     private string $originalDirectory = '';
 
     #[Test]
+    public function testAutoComposerDisablesOnZero(): void
+    {
+        putenv(assignment: 'COMPOSER_DEV_MODE=0');
+        file_put_contents(
+            filename: DevelopmentMode::ACTIVE_FILE,
+            data    : 'active file',
+        );
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--auto-composer' => true]));
+        static::assertStringContainsString('Development mode DISABLED.', $tester->getDisplay());
+    }
+
+    #[Test]
+    public function testAutoComposerDoesNothingWhenTheVariableIsEmpty(): void
+    {
+        putenv(assignment: 'COMPOSER_DEV_MODE=');
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--auto-composer' => true]));
+        static::assertStringContainsString(
+            'COMPOSER_DEV_MODE not set. Nothing to do.',
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
+    public function testAutoComposerDoesNothingWhenTheVariableIsUnset(): void
+    {
+        putenv(assignment: 'COMPOSER_DEV_MODE');
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--auto-composer' => true]));
+        static::assertStringContainsString(
+            'COMPOSER_DEV_MODE not set. Nothing to do.',
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
+    public function testAutoComposerEnablesOnOne(): void
+    {
+        putenv(assignment: 'COMPOSER_DEV_MODE=1');
+        $this->writeDistFile();
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--auto-composer' => true]));
+        static::assertStringContainsString('Development mode ENABLED.', $tester->getDisplay());
+    }
+
+    #[Test]
+    public function testAutoComposerFailsOnAnUnexpectedValue(): void
+    {
+        putenv(assignment: 'COMPOSER_DEV_MODE=maybe');
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::FAILURE, $tester->execute(['--auto-composer' => true]));
+        static::assertStringContainsString(
+            "COMPOSER_DEV_MODE set to unexpected value ('maybe'). Nothing to do.",
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
     public function testDisableFailsWhenTheActiveFileCannotBeRemoved(): void
     {
         // A directory satisfies file_exists() but unlink() refuses it.
-        mkdir(directory: DevelopmentModeCommand::ACTIVE_FILE);
+        mkdir(directory: DevelopmentMode::ACTIVE_FILE);
 
         $tester = $this->tester();
 
@@ -70,10 +149,34 @@ final class DevelopmentModeCommandTest extends TestCase
     }
 
     #[Test]
+    public function testDisableFailsWhenTheLocalOverridesFileCannotBeRemoved(): void
+    {
+        file_put_contents(
+            filename: DevelopmentMode::ACTIVE_FILE,
+            data    : 'active file',
+        );
+
+        // A directory satisfies file_exists() but unlink() refuses it.
+        mkdir(directory: DevelopmentMode::LOCAL_FILE);
+
+        $tester = $this->tester();
+
+        $status = $this->withoutWarnings(
+            static fn(): int => $tester->execute(['--disable' => true]),
+        );
+
+        static::assertSame(Command::FAILURE, $status);
+        static::assertStringContainsString(
+            'Unable to remove "config/autoload/development.local.php".',
+            $tester->getDisplay(),
+        );
+    }
+
+    #[Test]
     public function testDisableRemovesTheActiveFile(): void
     {
         file_put_contents(
-            filename: DevelopmentModeCommand::ACTIVE_FILE,
+            filename: DevelopmentMode::ACTIVE_FILE,
             data    : 'active file',
         );
 
@@ -81,14 +184,14 @@ final class DevelopmentModeCommandTest extends TestCase
 
         static::assertSame(Command::SUCCESS, $tester->execute(['--disable' => true]));
         static::assertStringContainsString('Development mode DISABLED.', $tester->getDisplay());
-        static::assertFileDoesNotExist(DevelopmentModeCommand::ACTIVE_FILE);
+        static::assertFileDoesNotExist(DevelopmentMode::ACTIVE_FILE);
     }
 
     #[Test]
     public function testDisableRemovesTheAggregatedConfigCache(): void
     {
         file_put_contents(
-            filename: DevelopmentModeCommand::ACTIVE_FILE,
+            filename: DevelopmentMode::ACTIVE_FILE,
             data    : 'active file',
         );
         $this->writeConfigCache();
@@ -106,8 +209,8 @@ final class DevelopmentModeCommandTest extends TestCase
     #[Test]
     public function testDisableRemovesTheConfigCacheWhenAlreadyDisabled(): void
     {
-        // A cache outlives the toggle that produced it, so the already-disabled
-        // path has to drop it too.
+        // The reference documents that both actions drop the cache, so the
+        // already-disabled path drops it too.
         $this->writeConfigCache();
 
         $tester = $this->tester(configCachePath: self::CACHE_FILE);
@@ -125,31 +228,49 @@ final class DevelopmentModeCommandTest extends TestCase
     }
 
     #[Test]
-    public function testEnableCopiesTheDistFileToTheActiveFile(): void
+    public function testDisableRemovesTheLocalOverridesFile(): void
     {
-        $this->writeDistFile(contents: 'dist contents');
+        file_put_contents(
+            filename: DevelopmentMode::ACTIVE_FILE,
+            data    : 'active file',
+        );
+        file_put_contents(
+            filename: DevelopmentMode::LOCAL_FILE,
+            data    : 'local file',
+        );
 
         $tester = $this->tester();
 
+        static::assertSame(Command::SUCCESS, $tester->execute(['--disable' => true]));
+        static::assertFileDoesNotExist(DevelopmentMode::LOCAL_FILE);
+    }
+
+    #[Test]
+    public function testEnableCopiesTheDistFileWhereSymlinksAreNotTrusted(): void
+    {
+        $this->writeDistFile(contents: 'dist contents');
+
+        $tester = $this->tester(platform: 'Windows');
+
         static::assertSame(Command::SUCCESS, $tester->execute(['--enable' => true]));
-        static::assertStringContainsString('Development mode ENABLED.', $tester->getDisplay());
+        static::assertFalse(is_link(filename: DevelopmentMode::ACTIVE_FILE));
         static::assertSame(
             'dist contents',
-            file_get_contents(filename: DevelopmentModeCommand::ACTIVE_FILE),
+            file_get_contents(filename: DevelopmentMode::ACTIVE_FILE),
         );
     }
 
     #[Test]
-    public function testEnableFailsWhenTheDistFileCannotBeCopied(): void
+    public function testEnableFailsWhenTheActiveFileCannotBeCreated(): void
     {
         $this->writeDistFile();
 
-        // A dangling symlink defeats file_exists() without defeating copy(),
-        // which fails writing through it. A permissions-based failure would not
-        // hold when the suite runs as root.
+        // A dangling symlink defeats file_exists() without defeating symlink(),
+        // which refuses a path that already exists. A permissions-based failure
+        // would not hold when the suite runs as root.
         symlink(
             target: sprintf('%s/nonexistent/%s', $this->projectRoot, bin2hex(random_bytes(4))),
-            link  : DevelopmentModeCommand::ACTIVE_FILE,
+            link  : DevelopmentMode::ACTIVE_FILE,
         );
 
         $tester = $this->tester();
@@ -160,7 +281,7 @@ final class DevelopmentModeCommandTest extends TestCase
 
         static::assertSame(Command::FAILURE, $status);
         static::assertStringContainsString(
-            'Unable to copy "config/development.config.php.dist" to "config/development.config.php".',
+            'Unable to create "config/development.config.php".',
             $tester->getDisplay(),
         );
     }
@@ -172,10 +293,36 @@ final class DevelopmentModeCommandTest extends TestCase
 
         static::assertSame(Command::FAILURE, $tester->execute(['--enable' => true]));
         static::assertStringContainsString(
-            'Dist file "config/development.config.php.dist" not found.',
+            'MISSING "config/development.config.php.dist".',
             $tester->getDisplay(),
         );
-        static::assertFileDoesNotExist(DevelopmentModeCommand::ACTIVE_FILE);
+        static::assertFileDoesNotExist(DevelopmentMode::ACTIVE_FILE);
+    }
+
+    #[Test]
+    public function testEnableFailsWhenTheLocalOverridesFileCannotBePlaced(): void
+    {
+        $this->writeDistFile();
+        file_put_contents(
+            filename: DevelopmentMode::LOCAL_DIST,
+            data    : 'local contents',
+        );
+
+        // A directory at the destination defeats symlink(), which refuses a path
+        // that already exists.
+        mkdir(directory: DevelopmentMode::LOCAL_FILE);
+
+        $tester = $this->tester();
+
+        $status = $this->withoutWarnings(
+            static fn(): int => $tester->execute(['--enable' => true]),
+        );
+
+        static::assertSame(Command::FAILURE, $status);
+        static::assertStringContainsString(
+            'Unable to create "config/autoload/development.local.php".',
+            $tester->getDisplay(),
+        );
     }
 
     #[Test]
@@ -203,6 +350,40 @@ final class DevelopmentModeCommandTest extends TestCase
     }
 
     #[Test]
+    public function testEnableLinksTheDistFileWhereSymlinksAreTrusted(): void
+    {
+        $this->writeDistFile(contents: 'dist contents');
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--enable' => true]));
+        static::assertStringContainsString('Development mode ENABLED.', $tester->getDisplay());
+        static::assertTrue(is_link(filename: DevelopmentMode::ACTIVE_FILE));
+        static::assertSame(
+            'dist contents',
+            file_get_contents(filename: DevelopmentMode::ACTIVE_FILE),
+        );
+    }
+
+    #[Test]
+    public function testEnablePlacesTheLocalOverridesFile(): void
+    {
+        $this->writeDistFile();
+        file_put_contents(
+            filename: DevelopmentMode::LOCAL_DIST,
+            data    : 'local contents',
+        );
+
+        $tester = $this->tester();
+
+        static::assertSame(Command::SUCCESS, $tester->execute(['--enable' => true]));
+        static::assertSame(
+            'local contents',
+            file_get_contents(filename: DevelopmentMode::LOCAL_FILE),
+        );
+    }
+
+    #[Test]
     public function testEnableRemovesTheAggregatedConfigCache(): void
     {
         $this->writeDistFile();
@@ -222,7 +403,7 @@ final class DevelopmentModeCommandTest extends TestCase
     public function testEnableRemovesTheConfigCacheWhenAlreadyEnabled(): void
     {
         file_put_contents(
-            filename: DevelopmentModeCommand::ACTIVE_FILE,
+            filename: DevelopmentMode::ACTIVE_FILE,
             data    : 'existing active file',
         );
         $this->writeConfigCache();
@@ -241,7 +422,7 @@ final class DevelopmentModeCommandTest extends TestCase
         static::assertFileDoesNotExist(self::CACHE_FILE);
         static::assertSame(
             'existing active file',
-            file_get_contents(filename: DevelopmentModeCommand::ACTIVE_FILE),
+            file_get_contents(filename: DevelopmentMode::ACTIVE_FILE),
         );
     }
 
@@ -261,7 +442,7 @@ final class DevelopmentModeCommandTest extends TestCase
     public function testStatusReportsAnEnabledApplication(): void
     {
         file_put_contents(
-            filename: DevelopmentModeCommand::ACTIVE_FILE,
+            filename: DevelopmentMode::ACTIVE_FILE,
             data    : 'active file',
         );
 
@@ -286,15 +467,29 @@ final class DevelopmentModeCommandTest extends TestCase
         static::assertStringContainsString('No action requested.', $display);
         static::assertStringContainsString('Usage:', $display);
         static::assertStringContainsString(
-            '  dev:mode --enable   Copy the dist file to enable development mode',
+            '  dev:mode --enable        Create the active file to enable development mode',
             $display,
         );
         static::assertStringContainsString(
-            '  dev:mode --disable  Remove the active file to disable development mode',
+            '  dev:mode --disable       Remove the active file to disable development mode',
             $display,
         );
         static::assertStringContainsString(
-            '  dev:mode --status   Report whether development mode is currently enabled',
+            '  dev:mode --status        Report whether development mode is currently enabled',
+            $display,
+        );
+        // The contract block is separated from the flag list by a blank line.
+        static::assertStringContainsString("\n\nEnabling creates", $display);
+        static::assertStringContainsString(
+            'Enabling creates "config/development.config.php" from "config/development.config.php.dist",',
+            $display,
+        );
+        static::assertStringContainsString(
+            'and "config/autoload/development.local.php" from "config/autoload/development.local.php.dist" when that file exists.',
+            $display,
+        );
+        static::assertStringContainsString(
+            'Disabling removes both, and either action drops the aggregated config cache.',
             $display,
         );
     }
@@ -323,6 +518,13 @@ final class DevelopmentModeCommandTest extends TestCase
             recursive  : true,
         );
 
+        // The optional local overrides file lives one level deeper.
+        mkdir(
+            directory  : "{$this->projectRoot}/config/autoload",
+            permissions: 0o777,
+            recursive  : true,
+        );
+
         // The command resolves every path against the working directory, which
         // the console binary sets to the project root.
         chdir(directory: $this->projectRoot);
@@ -331,6 +533,7 @@ final class DevelopmentModeCommandTest extends TestCase
     #[Override]
     protected function tearDown(): void
     {
+        putenv(assignment: 'COMPOSER_DEV_MODE');
         chdir(directory: $this->originalDirectory);
         $this->removeDirectory($this->projectRoot);
 
@@ -368,9 +571,12 @@ final class DevelopmentModeCommandTest extends TestCase
         rmdir(directory: $path);
     }
 
-    private function tester(?string $configCachePath = null): CommandTester
+    private function tester(?string $configCachePath = null, string $platform = 'Linux'): CommandTester
     {
-        return new CommandTester(new DevelopmentModeCommand(configCachePath: $configCachePath));
+        return new CommandTester(new DevelopmentModeCommand(
+            configCachePath: $configCachePath,
+            platform       : $platform,
+        ));
     }
 
     /**
@@ -405,7 +611,7 @@ final class DevelopmentModeCommandTest extends TestCase
     private function writeDistFile(string $contents = 'dist contents'): void
     {
         file_put_contents(
-            filename: DevelopmentModeCommand::DIST_FILE,
+            filename: DevelopmentMode::DIST_FILE,
             data    : $contents,
         );
     }
