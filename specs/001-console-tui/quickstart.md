@@ -36,6 +36,25 @@ Validation guide — proves the feature end-to-end. Implementation details belon
 
    **Expected**: the console still launches and reports that no commands are available.
 
+8. Fill in a command with several arguments and options, and press Enter while a middle field is
+   focused.
+
+   **Expected**: the command runs — submission does not require first moving to the last field.
+
+9. Submit a command leaving a required argument blank.
+
+   **Expected**: the command does not run, the blank field is named on the row above the key hints,
+   focus moves to it, and the values already entered are still there.
+
+10. Look at a field that carries a declared default.
+
+    **Expected**: the field's description is visible even though the field is already populated.
+
+11. Run a command that asks its own questions.
+
+    **Expected**: each question is shown and can be answered; the command completes and its output
+    and status are shown.
+
 ## Success
 
 All acceptance scenarios in [spec.md](./spec.md) hold in a terminal with no manual command-list configuration.

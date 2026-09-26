@@ -14,3 +14,4 @@ A Symfony Console `Command` with:
 
 - The command is invocable independently of the console and returns an exit status (`0` success, non-zero failure).
 - The console presents the command's name, description, arguments, and options; it does not reimplement command logic.
+- The command MAY ask questions of its own (Symfony's `QuestionHelper`); the console shows them and returns the operator's answers. A command does not need to be non-interactive to be wrapped, and it MUST NOT be given its defaults in place of an answer.

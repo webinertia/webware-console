@@ -8,6 +8,16 @@
 
 **Input**: User description: "Build the Webware console TUI: present a menu of CLI commands from Webware components and Mezzio, show better help for each command, and invoke them."
 
+## Clarifications
+
+### Session 2026-09-25
+
+- Q: Should Enter submit the form from any field, moving field navigation entirely to Tab/Up/Down? → A: Enter submits from any field, but submission is refused while any required field is blank; Tab, Up and Down move between fields and remain the only way to navigate.
+- Q: When the form is submitted with a required field left blank, what should happen? → A: Refuse to run, name the blank required field(s), and keep the operator in the form with every value already entered left intact. Passing an empty value through so the command fails somewhere inside is not acceptable.
+- Q: Where should the active field's description be shown so it survives a field that already has a value? → A: On the spare row directly below the field list, showing the active field's description.
+- Q: How should the console handle a wrapped command that asks its own questions? → A: Support both. A command that never prompts keeps having its output captured and shown after it finishes; a command that does prompt has each of its questions shown to the operator and answerable from the menu, so the console neither swallows the question nor appears to hang. Answering questions with their defaults on the operator's behalf is not acceptable.
+- Q: Should `user:init-db` be rewritten to declared required/optional input as part of this work? → A: No. It must keep accepting its varied input, because answering its questions with defaults would make it useless. It stays as it is and becomes the proof case that a wrapped command can still ask its questions through the console.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Browse commands via a menu (Priority: P1)
@@ -52,6 +62,10 @@ The operator selects a command, supplies the required inputs, runs it, and sees 
 
 1. **Given** a selected command that succeeds, **When** it runs, **Then** its output is shown with a success status and the console returns to the menu.
 2. **Given** a selected command that fails, **When** it runs, **Then** the failure and its cause are shown and the console returns to the menu without crashing.
+3. **Given** a command with several arguments and options, **When** the operator fills them in and submits from whichever field they are standing on, **Then** the command runs without the operator first having to move to the last field.
+4. **Given** a command with a required field, **When** the operator submits while that field is blank, **Then** the command does not run, the blank field is named, and the operator's other entries are still there to correct.
+5. **Given** a field pre-filled from a declared default, **When** the operator looks at the form, **Then** that field's description is visible even though the field is not blank.
+6. **Given** a command that asks one or more questions of its own, **When** it runs from the menu, **Then** each question is shown to the operator and can be answered.
 
 ---
 
@@ -77,6 +91,10 @@ The menu automatically reflects the commands provided by installed Webware compo
 - A command has a very large number of arguments or options — help MUST remain readable (e.g. grouped or scrollable).
 - A command takes a long time to run — the console MUST remain responsive and show that it is still working.
 - An operator aborts input for a command midway — the console MUST return to the menu without a partial or broken state.
+- A required field is left blank at submission — the console MUST refuse to run and name the field rather than passing an empty value to the command.
+- A field's value is seeded from a declared default — that field's description MUST stay visible, since a pre-filled value is exactly where the operator most needs to know what is allowed.
+- A wrapped command asks a question while it runs — the question MUST be shown to the operator and MUST be answerable, and the console MUST NOT appear to hang with the question invisible.
+- A wrapped command never asks a question — its output MUST still be captured and shown after it completes.
 
 ## Requirements *(mandatory)*
 
@@ -90,11 +108,17 @@ The menu automatically reflects the commands provided by installed Webware compo
 - **FR-006**: System MUST handle duplicate command names without hiding either command or misrunning them.
 - **FR-007**: System MUST remain operable when no commands are available.
 - **FR-008**: System MUST return to the menu after a command completes or fails.
+- **FR-009**: System MUST accept submission of a command's input form from any field, without the operator first having to reach a particular field.
+- **FR-010**: System MUST refuse to run a command while any of its required fields is blank, MUST identify each blank required field by name, and MUST keep the operator in the form with all previously entered values preserved.
+- **FR-011**: System MUST keep the active field's description visible whenever that field holds a value, including a value seeded from a declared default.
+- **FR-012**: System MUST make a wrapped command's own questions reachable and answerable from the menu, so that a command which prompts can be completed from the console — its questions MUST NOT be swallowed, and MUST NOT be answered with defaults on the operator's behalf.
+- **FR-013**: System MUST continue to capture and display the output of a wrapped command that never prompts (FR-004).
 
 ### Key Entities *(include if feature involves data)*
 
 - **Command**: an invocable operation with a name, a short purpose, arguments, and options.
 - **Command map**: the discovered name => command-class registrations presented in the menu (loaded lazily via a Symfony command loader).
+- **Wrapped command shape**: the arguments and options a command declares, which is what the console's input form is built from. The shapes already reachable from the menu range from a single field (`servicemanager:generate-factory-for-class`, one required argument; `acl:init-db`, one option) up to seven (`mezzio:handler:create`: one required argument, two flags, and up to four template options that appear only when a template renderer is registered), and include a command whose middle field is a flag rather than a value (`dev:mode`: `enable`, `disable`, `status`). Whether a command prompts, and how many fields it declares, are independent of each other.
 
 ## Success Criteria *(mandatory)*
 
@@ -105,6 +129,8 @@ The menu automatically reflects the commands provided by installed Webware compo
 - **SC-003**: The help view accurately reflects every argument and option of a command.
 - **SC-004**: Running a command from the menu produces the same output and status as invoking it directly.
 - **SC-005**: An operator can complete the locate → view-help → run flow for a typical command in under 1 minute.
+- **SC-006**: An operator can complete any command reachable from the menu using only Tab/Up/Down to move between fields, Space to toggle a flag, and Enter to submit — no command can only be completed by first reaching a particular field.
+- **SC-007**: Running a command that asks questions of its own from the menu never leaves the console unresponsive: every question the command asks is shown to the operator and can be answered.
 
 ## Assumptions
 
@@ -114,3 +140,5 @@ The menu automatically reflects the commands provided by installed Webware compo
 - The rendering stack for the text interface is decided during planning, not in this specification.
 - In v1 the console focuses on the menu, help, and invocation. mezzio-tooling commands are discovered via the merged `laminas-cli` config key; fully wrapping mezzio-tooling's TUI remains a longer-term direction.
 - Discovered commands are component-registered commands, not arbitrary shell commands.
+- The submission, required-field validation and active-field help behaviours belong to the shared input machinery, so they change for every command driven through the menu — not only the command that first exposed the defects.
+- A command that asks its own questions is expected to remain usable from the console rather than be excluded from it; the operator's answer, not the question's default, is what such a command receives.
