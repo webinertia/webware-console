@@ -121,8 +121,12 @@ asterisk in its field label:
 ```text
 > * configFile: <value>
     class: <value>
-  --ignore-unresolved: [ ]
+    ignore-unresolved: [ ]
 ```
+
+Field labels reserve the marker column — the asterisk for a required argument, a
+space otherwise — and an option's label carries its bare name, without the `--` its
+input parameter is built with.
 
 That is why `dev:mode` shows none (three `VALUE_NONE` flags, and options are never required) while
 `mezzio:handler:create` shows one (`handler` is `InputArgument::REQUIRED`). The marker exists so
