@@ -531,11 +531,11 @@ final class DevelopmentModeCommandTest extends TestCase
         static::assertStringContainsString('No action requested.', $display);
         static::assertStringContainsString('Usage:', $display);
         static::assertStringContainsString(
-            '  dev:mode --enable        Create the active file to enable development mode',
+            '  dev:mode --enable        Create config/development.config.php from config/development.config.php.dist',
             $display,
         );
         static::assertStringContainsString(
-            '  dev:mode --disable       Remove the active file to disable development mode',
+            '  dev:mode --disable       Remove config/development.config.php and config/autoload/development.local.php',
             $display,
         );
         static::assertStringContainsString(

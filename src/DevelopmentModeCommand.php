@@ -46,13 +46,15 @@ final class DevelopmentModeCommand extends Command
 {
     /**
      * Single source of truth for the flags: both the option definition and the
-     * usage text are built from it, so they cannot drift apart.
+     * usage text are built from it, so they cannot drift apart. Every file action
+     * names the path it touches, so "create" can only mean the config file and
+     * never the config cache.
      *
      * @var array<string, string>
      */
     private const array ACTIONS = [
-        'enable'        => 'Create the active file to enable development mode',
-        'disable'       => 'Remove the active file to disable development mode',
+        'enable'        => 'Create ' . DevelopmentMode::ACTIVE_FILE . ' from ' . DevelopmentMode::DIST_FILE,
+        'disable'       => 'Remove ' . DevelopmentMode::ACTIVE_FILE . ' and ' . DevelopmentMode::LOCAL_FILE,
         'status'        => 'Report whether development mode is currently enabled',
         'clear-cache'   => 'Remove the aggregated config cache without changing the mode',
         'auto-composer' => 'Follow COMPOSER_DEV_MODE: enable on 1, disable on 0, do nothing otherwise',
