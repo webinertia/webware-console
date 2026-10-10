@@ -1,6 +1,6 @@
 # Webware Console
 
-A text user interface for Webware and Mezzio CLI commands — a navigable menu,
+A text user interface for Webware and Mezzio CLI commands - a navigable menu,
 better per-command help, and interactive input, built over Symfony Console.
 
 [![Continuous Integration](https://github.com/webinertia/webware-console/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml/badge.svg)](https://github.com/webinertia/webware-console/actions/workflows/required/webinertia/.github/.github/workflows/org-required-ci.yml)
@@ -12,11 +12,11 @@ components register. It does not reimplement command logic.
 
 ## Features
 
-- **Menu** — a keyboard-navigable list of every discovered command.
-- **Help** — a command's purpose, arguments, and options on demand.
-- **Run** — collect arguments, options, and flags interactively; run in-process;
+- **Menu**: a keyboard-navigable list of every discovered command.
+- **Help**: a command's purpose, arguments, and options on demand.
+- **Run**: collect arguments, options, and flags interactively; run in-process;
   report output and exit status before returning to the menu.
-- **Runtime discovery** — commands appear from installed components with no
+- **Runtime discovery**: commands appear from installed components with no
   manual command list.
 
 ## Documentation

@@ -6,21 +6,21 @@
 
 A Symfony Console `Command`, registered in the container and mapped by name.
 
-- `name`: string — the config map key (unique identifier).
-- `description`: string — short purpose shown in help.
-- `arguments`: list — each with name, description, required flag.
-- `options`: list — each with name, description, required flag.
+- `name`: string - the config map key (unique identifier).
+- `description`: string - short purpose shown in help.
+- `arguments`: list - each with name, description, required flag.
+- `options`: list - each with name, description, required flag.
 
 ### Command map (config)
 
-- `array<string, class-string>` — name => command class, merged from the
+- `array<string, class-string>` - name => command class, merged from the
   `ConsoleInterface::class` key and the `laminas-cli` key. Turned into a lazy
   `ContainerCommandLoader`; no command instance exists until it is invoked.
 
 ### MenuState (in-memory)
 
-- `selection`: index — currently highlighted command name.
-- `filter`: string — optional search/filter term.
+- `selection`: index - currently highlighted command name.
+- `filter`: string - optional search/filter term.
 
 ### HelpView (derived, on demand)
 
@@ -32,22 +32,22 @@ A Symfony Console `Command`, registered in the container and mapped by name.
 
 One argument or option of the selected command, rendered as an editable field.
 
-- `name`: string — the argument name, or the option name without its `--` prefix.
-- `description`: string — the help text shown on the status row while this field is active.
-- `kind`: `Argument` | `Option` | `Flag` — flags are toggled with `Space`; the others are typed.
-- `required`: bool — `true` only for arguments declared required; options are never required. Drives the asterisk in the field label and the check made when Enter is pressed.
-- `isArray`: bool — a comma-separated value becomes a list when the command's input is built.
-- `value`: string — seeded from the declared default.
-- `flagValue`: bool — seeded from a boolean default.
-- `cursor`: int — edit position, clamped to the value's length.
+- `name`: string - the argument name, or the option name without its `--` prefix.
+- `description`: string - the help text shown on the status row while this field is active.
+- `kind`: `Argument` | `Option` | `Flag` - flags are toggled with `Space`; the others are typed.
+- `required`: bool - `true` only for arguments declared required; options are never required. Drives the asterisk in the field label and the check made when Enter is pressed.
+- `isArray`: bool - a comma-separated value becomes a list when the command's input is built.
+- `value`: string - seeded from the declared default.
+- `flagValue`: bool - seeded from a boolean default.
+- `cursor`: int - edit position, clamped to the value's length.
 
 ### PromptState (in-memory)
 
 - `fields`: list<PromptField>.
-- `activeIndex`: int — wraps modulo the field count.
+- `activeIndex`: int - wraps modulo the field count.
 - `submitted`: bool.
 - `cancelled`: bool.
-- `refused`: bool — whether a submission has been refused, so the blank required fields are reported until they are filled in; once they are, the row goes back to the active field's description.
+- `refused`: bool - whether a submission has been refused, so the blank required fields are reported until they are filled in; once they are, the row goes back to the active field's description.
 
 ### PromptStatusRow (derived, on demand)
 

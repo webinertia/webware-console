@@ -1,7 +1,7 @@
 # Command input
 
 Selecting a command from the menu opens a form built from the command's own
-definition — one field per argument and per option — so the operator can see what
+definition - one field per argument and per option - so the operator can see what
 the command needs without going back and forth to its docs or source.
 
 ## Keys
@@ -30,7 +30,7 @@ is not run: the row beneath the fields names the blank required fields, focus mo
 to the first of them, and every value already entered is left as it is.
 
 Requiredness is read from the command's own definition, and only an *argument* can
-carry it — Symfony's `InputOption` has no required concept, so an option is never
+carry it - Symfony's `InputOption` has no required concept, so an option is never
 marked or validated. A command that needs a mandatory value must declare it as a
 required argument:
 
@@ -42,8 +42,8 @@ $command->addArgument(
 );
 ```
 
-A requirement expressed only in control flow — an option consulted with `??` and
-asked for when absent — cannot be seen by the console, so it can be neither marked
+A requirement expressed only in control flow - an option consulted with `??` and
+asked for when absent - cannot be seen by the console, so it can be neither marked
 nor validated.
 
 ## Defaults and help
@@ -60,6 +60,6 @@ input, so the command's own default applies.
 
 The console does not display a question a command asks itself. If a command needs to
 prompt for a value the operator did not supply, that belongs in the command's own
-`interact()` — which Symfony runs before it validates the definition, so it also
+`interact()` - which Symfony runs before it validates the definition, so it also
 works when the command is run directly. Declaring the value as a required argument
 means the console handles it instead, and the command never has to ask.

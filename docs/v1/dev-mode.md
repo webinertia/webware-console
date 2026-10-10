@@ -1,4 +1,4 @@
-# `dev:mode` — parity with `laminas/laminas-development-mode`
+# `dev:mode`: parity with `laminas/laminas-development-mode`
 
 Replacement for `laminas/laminas-development-mode` (referred to below as *the reference*,
 `3.16.x`). Developers coming from Mezzio expect the same observable result, so this document
@@ -26,32 +26,32 @@ Sources read in full to build this table: `src/Command.php`, `src/Help.php`,
 |---|---|---|
 | 1 | `Enable` creates `config/autoload/development.local.php` from its `.dist` **when the `.dist` exists** | replicate |
 | 2 | `Disable` removes `config/autoload/development.local.php` **when present** | replicate |
-| 3 | Enable links rather than copies on `Linux`/`Unix`/`Darwin`: `symlink(basename($source), $destination)` — `copy()` only on other OSes | replicate |
+| 3 | Enable links rather than copies on `Linux`/`Unix`/`Darwin`: `symlink(basename($source), $destination)` - `copy()` only on other OSes | replicate |
 | 4 | Fifth subcommand `auto-composer`: reads `COMPOSER_DEV_MODE`; absent/`''` → no-op exit 0; `'0'` → disable; `'1'` → enable; anything else → message, exit 1 | replicate |
-| 5 | No arguments → stderr `No arguments provided.` + help, **exit 1**. Unrecognized argument → stderr `Unrecognized argument.` + help, **exit 1** | **presentation — ours.** No action prints the usage and exits 0, so an empty submit from the menu is not reported as a failure. Unrecognized options are already rejected by Symfony with a non-zero exit. |
-| 6 | Cache discovery falls back to MVC `module_listener_options.cache_dir` + `module-config-cache[.<config_cache_key>].php` after `config_cache_path` | **out of scope** — MVC has no equivalent here; a Mezzio application declares `config_cache_path` in `config/config.php` and the console reads it from the aggregated container config |
-| 7 | The already-in-state branches return **before** removing the cache, so an already-enabled or already-disabled application keeps it — even though `Help` states the opposite: "both when disabling and enabling development mode, the script will remove the file cache/module-config-cache.php" | **the documented contract is what is replicated, not the code path.** The console removes the cache on every `enable`/`disable`. That is what the reference's own help text promises and what developers expect; the reference's early return contradicts its documentation. |
-| 8 | Errors are written to **STDERR**; help on request goes to stdout | **presentation — ours.** Diagnostics go through the command's own output. |
+| 5 | No arguments → stderr `No arguments provided.` + help, **exit 1**. Unrecognized argument → stderr `Unrecognized argument.` + help, **exit 1** | **presentation - ours.** No action prints the usage and exits 0, so an empty submit from the menu is not reported as a failure. Unrecognized options are already rejected by Symfony with a non-zero exit. |
+| 6 | Cache discovery falls back to MVC `module_listener_options.cache_dir` + `module-config-cache[.<config_cache_key>].php` after `config_cache_path` | **out of scope**: MVC has no equivalent here; a Mezzio application declares `config_cache_path` in `config/config.php` and the console reads it from the aggregated container config |
+| 7 | The already-in-state branches return **before** removing the cache, so an already-enabled or already-disabled application keeps it - even though `Help` states the opposite: "both when disabling and enabling development mode, the script will remove the file cache/module-config-cache.php" | **the documented contract is what is replicated, not the code path.** The console removes the cache on every `enable`/`disable`. That is what the reference's own help text promises and what developers expect; the reference's early return contradicts its documentation. |
+| 8 | Errors are written to **STDERR**; help on request goes to stdout | **presentation - ours.** Diagnostics go through the command's own output. |
 | 9 | The help text documents the whole file contract (required `.dist`, optional `.local.dist`, cache removal) | replicate |
 | 10 | The package ships `development.config.php.dist` **and** `development.local.php.dist` for consumers to copy into place | replicate |
-| 11 | Messages: `You are now in development mode.` / `Development mode is now disabled.` / `Already in development mode!` / `Development mode was already disabled.` / `Development mode is ENABLED` / `Development mode is DISABLED` | **DIVERGENCE — wording only.** The console keeps its own voice; the information conveyed is identical. |
-| 12 | `Status` reads exactly one thing: `file_exists('config/development.config.php')` — never the cache, never `.local` | replicate. The console additionally reports a cache removal **only when a file was actually removed**, so the output describes what happened rather than what was attempted. |
+| 11 | Messages: `You are now in development mode.` / `Development mode is now disabled.` / `Already in development mode!` / `Development mode was already disabled.` / `Development mode is ENABLED` / `Development mode is DISABLED` | **DIVERGENCE - wording only.** The console keeps its own voice; the information conveyed is identical. |
+| 12 | `Status` reads exactly one thing: `file_exists('config/development.config.php')` - never the cache, never `.local` | replicate. The console additionally reports a cache removal **only when a file was actually removed**, so the output describes what happened rather than what was attempted. |
 
-| 13 | No cache-only action exists. The reference clears the cache only as a side effect of enable/disable, and the Mezzio skeleton ships a separate `bin/clear-config-cache.php` for the standalone case | **addition.** `--clear-cache` drops the cache and changes nothing else, so a stale cache can be cleared without toggling the mode off and on again. It reports three outcomes separately — removed, nothing to remove, and present but unremovable, which exits 1 to match the skeleton script — and the usage text documents it. |
+| 13 | No cache-only action exists. The reference clears the cache only as a side effect of enable/disable, and the Mezzio skeleton ships a separate `bin/clear-config-cache.php` for the standalone case | **addition.** `--clear-cache` drops the cache and changes nothing else, so a stale cache can be cleared without toggling the mode off and on again. It reports three outcomes separately - removed, nothing to remove, and present but unremovable, which exits 1 to match the skeleton script - and the usage text documents it. |
 
 ## Where this lives
 
 | Class | Responsibility |
 |---|---|
-| `Webware\Console\DevelopmentMode` | The filesystem policy — the four paths, link-versus-copy, and the aggregated config cache. No output coupling, so each row above is testable on its own. |
-| `Webware\Console\DevelopmentModeCommand` | The CLI surface — flags, wording, exit codes, `--auto-composer`. |
+| `Webware\Console\DevelopmentMode` | The filesystem policy - the four paths, link-versus-copy, and the aggregated config cache. No output coupling, so each row above is testable on its own. |
+| `Webware\Console\DevelopmentModeCommand` | The CLI surface - flags, wording, exit codes, `--auto-composer`. |
 
 ## Row 7 in detail
 
 The reference leaves the cache alone when the requested state is already in force, but its own
 `Help` text says the cache is removed "both when disabling and enabling development mode". Those
 cannot both be right. The console follows the documentation, because that is the behaviour a
-migrating developer has been told to expect — and because `ConfigAggregator` returns an existing
+migrating developer has been told to expect - and because `ConfigAggregator` returns an existing
 cache without consulting a single provider, which makes a surviving cache authoritative and lets a
 stale state outlive the toggle meant to end it.
 

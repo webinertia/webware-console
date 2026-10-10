@@ -24,7 +24,7 @@ The console's own interface.
 - `Tab` / `Down`: next field (wraps). `Up`: previous field (wraps).
 - `Space`: toggle the focused flag.
 - `Left` / `Right` / `Backspace` / printable characters: edit the focused value.
-- `Enter`: submit — refused while any required field is blank.
+- `Enter`: submit - refused while any required field is blank.
 - `Esc`: cancel and return to the menu without running the command.
 
 The row between the last field and the key hints shows the active field's description, or the

@@ -58,7 +58,7 @@ what lets a stale state outlive the toggle that was meant to end it. The cache p
 application's own `config_cache_path` rather than a hardcoded location.
 
 Paths resolve against the working directory, which `bin/webware` sets to the project root. A failure
-— a missing dist file, a target that cannot be written, an active file that cannot be removed —
+ - a missing dist file, a target that cannot be written, an active file that cannot be removed -
 returns a non-zero exit code.
 
 ## CI

@@ -1,6 +1,6 @@
 # Quickstart: Console TUI
 
-Validation guide — proves the feature end-to-end. Implementation details belong in `tasks.md`.
+Validation guide - proves the feature end-to-end. Implementation details belong in `tasks.md`.
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ Validation guide — proves the feature end-to-end. Implementation details belon
 8. Fill in a command with several arguments and options, and press Enter while a middle field is
    focused.
 
-   **Expected**: the command runs — submission does not require first moving to the last field.
+   **Expected**: the command runs - submission does not require first moving to the last field.
 
 9. Submit a command leaving a required argument blank.
 

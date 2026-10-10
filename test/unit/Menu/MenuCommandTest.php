@@ -95,7 +95,7 @@ final class MenuCommandTest extends TestCase
 
         static::assertSame(Command::SUCCESS, $status);
         static::assertStringContainsString('Required: name', $this->text($console->frames()[1]));
-        // menu, refused prompt, submitted prompt, result — the first Enter ran nothing.
+        // menu, refused prompt, submitted prompt, result - the first Enter ran nothing.
         static::assertSame(4, $console->runCount);
     }
 

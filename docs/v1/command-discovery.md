@@ -1,6 +1,6 @@
 # Command discovery
 
-Commands are discovered at runtime — there is no hardcoded list. Components
+Commands are discovered at runtime - there is no hardcoded list. Components
 register their commands under the `ConsoleInterface::class` config key.
 
 ## The contract
@@ -23,7 +23,7 @@ return [
 ];
 ```
 
-Each entry is a Symfony Console `Command` — with a name, description, and
+Each entry is a Symfony Console `Command` - with a name, description, and
 declared arguments and options. The console presents and invokes the command; it
 does not reimplement its logic.
 
@@ -35,7 +35,7 @@ resolves a command class only when it is invoked, never when the menu is built.
 ## Mezzio tooling
 
 In addition to the `ConsoleInterface::class` key, the loader merges in
-`config['laminas-cli']['commands']` — mezzio-tooling's own key — so mezzio-tooling
+`config['laminas-cli']['commands']` - mezzio-tooling's own key - so mezzio-tooling
 commands are discovered for free.
 
 ## Duplicate names

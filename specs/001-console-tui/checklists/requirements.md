@@ -31,4 +31,4 @@
 
 ## Notes
 
-- All items validated — spec is ready for `/speckit-clarify` (optional) or `/speckit-plan`.
+- All items validated - spec is ready for `/speckit-clarify` (optional) or `/speckit-plan`.

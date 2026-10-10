@@ -23,7 +23,7 @@ use const PHP_OS;
  * Enables, disables and reports the application's development mode.
  *
  * The filesystem policy lives in {@see DevelopmentMode}; this class is only the CLI surface over
- * it. Side effects therefore match `laminas/laminas-development-mode` — the dist files are linked
+ * it. Side effects therefore match `laminas/laminas-development-mode` - the dist files are linked
  * rather than copied wherever symlinks are trusted, the optional
  * `config/autoload/development.local.php` is placed by enable and removed by disable,
  * COMPOSER_DEV_MODE is honoured, and both actions drop the aggregated config cache. Wording, flag

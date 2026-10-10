@@ -4,7 +4,7 @@ How commands are registered and surfaced.
 
 ## Contract
 
-- The stable discovery contract is the `Webware\Console\ConsoleInterface` marker — its `::class` is the config key.
+- The stable discovery contract is the `Webware\Console\ConsoleInterface` marker - its `::class` is the config key.
 - Components register commands under the config key `ConsoleInterface::class`, as a `commands` map of name → command class:
 
   ```php
@@ -19,7 +19,7 @@ How commands are registered and surfaced.
 
 ## Registration
 
-- Components expose their commands through their `ConfigProvider` under the `ConsoleInterface::class` key — no hardcoded list in the console.
+- Components expose their commands through their `ConfigProvider` under the `ConsoleInterface::class` key - no hardcoded list in the console.
 - `CommandLoaderFactory` reads `config[ConsoleInterface::class]['commands']` and merges in `config['laminas-cli']['commands']` (mezzio-tooling's key), so mezzio-tooling commands are discovered for free.
 - The console builds a Symfony `ContainerCommandLoader` from the merged map; commands are resolved lazily from the container only when invoked.
 
