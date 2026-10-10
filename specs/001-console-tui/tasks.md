@@ -4,12 +4,12 @@
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
-**Tests**: Included — the constitution's Quality Gates mandate 100% line + mutation coverage.
+**Tests**: Included - the constitution's Quality Gates mandate 100% line + mutation coverage.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (US1–US4)
+- **[Story]**: Which user story this task belongs to (US1 - US4)
 
 ## Phase 1: Setup (Shared Infrastructure)
 
@@ -25,16 +25,16 @@
 
 **⚠️ CRITICAL**: No user story work until this phase is complete.
 
-- [X] T004 Implement the `ConsoleInterface` marker (`src/ConsoleInterface.php`) — the stable discovery contract whose `::class` is the config key
-- [X] T005 Implement `CommandLoaderFactory` in `src/Container/CommandLoaderFactory.php` — build a lazy `ContainerCommandLoader` from `config[ConsoleInterface::class]['commands']`, merging `config['laminas-cli']['commands']` (mezzio-tooling's key); surface duplicate names (FR-005/FR-006)
-- [X] T006 [P] Symfony `Command` classes are the contract — no adapter; resolved lazily by the loader (superseded the planned adapter)
+- [X] T004 Implement the `ConsoleInterface` marker (`src/ConsoleInterface.php`) - the stable discovery contract whose `::class` is the config key
+- [X] T005 Implement `CommandLoaderFactory` in `src/Container/CommandLoaderFactory.php` - build a lazy `ContainerCommandLoader` from `config[ConsoleInterface::class]['commands']`, merging `config['laminas-cli']['commands']` (mezzio-tooling's key); surface duplicate names (FR-005/FR-006)
+- [X] T006 [P] Symfony `Command` classes are the contract - no adapter; resolved lazily by the loader (superseded the planned adapter)
 - [X] T007 [P] Unit test `CommandLoaderFactory` (merge, duplicate detection, lazy resolution) in `test/unit/Container/`
-- [X] T008 [P] Adapt the moved `config/` + `data/` skeleton to `Webware\Console\` — replace the placeholder `App\ConfigProvider` and remove phpdb providers; wire ConfigAggregator + ServiceManager bootstrap
+- [X] T008 [P] Adapt the moved `config/` + `data/` skeleton to `Webware\Console\` - replace the placeholder `App\ConfigProvider` and remove phpdb providers; wire ConfigAggregator + ServiceManager bootstrap
 - [X] T009 Wire the Symfony `Application` + `bin/webware` entry (shebang, executable) over the config/container bootstrap
 
 **Checkpoint**: discovery seam + runtime skeleton ready; no story blocked.
 
-## Phase 3: User Story 1 — Browse commands via a menu (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1: Browse commands via a menu (Priority: P1) 🎯 MVP
 
 **Goal**: Launch the console and navigate a list of discovered commands.
 
@@ -47,13 +47,13 @@
 
 ### Implementation for User Story 1
 
-- [X] T012 [P] [US1] Implement `Menu` in `src/Menu/Menu.php` — keyboard navigation state (up/down/quit) over the command names
-- [X] T013 [P] [US1] Implement `MenuRenderer` in `src/Menu/MenuRenderer.php` — render the menu with `Psl\Terminal`/`Psl\Ansi`; render a graceful empty state when no commands are available (FR-007)
+- [X] T012 [P] [US1] Implement `Menu` in `src/Menu/Menu.php` - keyboard navigation state (up/down/quit) over the command names
+- [X] T013 [P] [US1] Implement `MenuRenderer` in `src/Menu/MenuRenderer.php` - render the menu with `Psl\Terminal`/`Psl\Ansi`; render a graceful empty state when no commands are available (FR-007)
 - [X] T014 [US1] Wire the `menu` command (`MenuCommand`) into the Application via `ApplicationFactory`; `bin/webware` resolves the Application from the container and runs it
 
-**Checkpoint**: US1 independently functional — menu lists and navigates commands.
+**Checkpoint**: US1 independently functional - menu lists and navigates commands.
 
-## Phase 4: User Story 2 — View help for a command (Priority: P2)
+## Phase 4: User Story 2: View help for a command (Priority: P2)
 
 **Goal**: Show a focused command's purpose, arguments, and options.
 
@@ -65,12 +65,12 @@
 
 ### Implementation for User Story 2
 
-- [X] T016 [P] [US2] Implement `HelpFormatter` in `src/Help/HelpFormatter.php` — derive purpose/arguments/options from the command definition; group or scroll very long argument/option lists so help stays readable
+- [X] T016 [P] [US2] Implement `HelpFormatter` in `src/Help/HelpFormatter.php` - derive purpose/arguments/options from the command definition; group or scroll very long argument/option lists so help stays readable
 - [X] T017 [US2] Wire help rendering into the menu (focus command → show help)
 
-**Checkpoint**: US2 independently functional — help view reflects the command.
+**Checkpoint**: US2 independently functional - help view reflects the command.
 
-## Phase 5: User Story 3 — Run a command (Priority: P2)
+## Phase 5: User Story 3: Run a command (Priority: P2)
 
 **Goal**: Select a command, supply inputs, run it, see output + exit status, return to the menu.
 
@@ -82,12 +82,12 @@
 
 ### Implementation for User Story 3
 
-- [X] T019 [P] [US3] Implement `CommandInputPrompter` in `src/Prompt/CommandInputPrompter.php` — collect arguments/options via `Psl\Terminal`; abort cleanly back to the menu when the operator cancels input
-- [X] T020 [US3] Implement `CommandRunner` in `src/Runner/CommandRunner.php` — invoke in-process, capture output + exit status, show a working indicator for long-running commands, return to menu (FR-003/FR-004/FR-008)
+- [X] T019 [P] [US3] Implement `CommandInputPrompter` in `src/Prompt/CommandInputPrompter.php` - collect arguments/options via `Psl\Terminal`; abort cleanly back to the menu when the operator cancels input
+- [X] T020 [US3] Implement `CommandRunner` in `src/Runner/CommandRunner.php` - invoke in-process, capture output + exit status, show a working indicator for long-running commands, return to menu (FR-003/FR-004/FR-008)
 
-**Checkpoint**: US3 independently functional — run + report + return.
+**Checkpoint**: US3 independently functional - run + report + return.
 
-## Phase 6: User Story 4 — Discover commands from installed components (Priority: P3)
+## Phase 6: User Story 4: Discover commands from installed components (Priority: P3)
 
 **Goal**: The command map reflects installed components automatically.
 
@@ -99,9 +99,9 @@
 
 ### Implementation for User Story 4
 
-- [X] T022 [US4] Implement `ConfigProvider` in `src/ConfigProvider.php` — wire the loader/Application/menu factories so components contribute commands under `ConsoleInterface::class` (FR-005)
+- [X] T022 [US4] Implement `ConfigProvider` in `src/ConfigProvider.php` - wire the loader/Application/menu factories so components contribute commands under `ConsoleInterface::class` (FR-005)
 
-**Checkpoint**: US4 independently functional — runtime discovery, no manual list.
+**Checkpoint**: US4 independently functional - runtime discovery, no manual list.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
@@ -116,7 +116,7 @@
 
 ## Phase 8: Command input machinery (issue #31)
 
-**Goal**: a wrapped command can be driven to completion from the menu — executed from any field,
+**Goal**: a wrapped command can be driven to completion from the menu - executed from any field,
 validated before it runs, with what is required visible up front and its help text on screen.
 
 **Independent Test**: drive `dev:mode` (the reported failure) and
@@ -128,16 +128,16 @@ command. `acl:init-db` (1 field) and `user:init-db` (6, filled in order) hid Fin
 command driven through the menu, not only `dev:mode`.
 
 **Scope note**: the console does not display a wrapped command's own interactive questions. That
-was evaluated and is deliberately out of scope — see `plan.md`, "Out of scope: a command's own
+was evaluated and is deliberately out of scope - see `plan.md`, "Out of scope: a command's own
 interactive questions".
 
 ### Tests for Phase 8
 
-- [ ] T029 [P] [US3] Unit test execution from any field in `test/unit/Prompt/PromptKeyActionTest.php` — Enter on a middle field with every required field filled executes, and Enter no longer advances the active index
-- [ ] T030 [P] [US3] Unit test the refusal path — a blank required field sets `PromptState::$refused`, moves the active index to the first blank required field, executes nothing, and leaves entered values intact
-- [ ] T031 [P] [US3] Unit test the status row in `test/unit/Prompt/CommandInputPrompterTest.php` — the active field's description renders at `y + count` even when the field holds a value seeded from a default, a refusal report takes precedence, and the description is no longer passed as the placeholder
-- [ ] T032 [P] [US3] Unit test the required-field report — blank required fields are named in declaration order, a blank optional field is not named, and the report shrinks as values are filled in
-- [ ] T033 [P] [US3] Unit test the asterisk marker — a required argument's label carries `*`; an optional argument's and every option's does not
+- [ ] T029 [P] [US3] Unit test execution from any field in `test/unit/Prompt/PromptKeyActionTest.php` - Enter on a middle field with every required field filled executes, and Enter no longer advances the active index
+- [ ] T030 [P] [US3] Unit test the refusal path - a blank required field sets `PromptState::$refused`, moves the active index to the first blank required field, executes nothing, and leaves entered values intact
+- [ ] T031 [P] [US3] Unit test the status row in `test/unit/Prompt/CommandInputPrompterTest.php` - the active field's description renders at `y + count` even when the field holds a value seeded from a default, a refusal report takes precedence, and the description is no longer passed as the placeholder
+- [ ] T032 [P] [US3] Unit test the required-field report - blank required fields are named in declaration order, a blank optional field is not named, and the report shrinks as values are filled in
+- [ ] T033 [P] [US3] Unit test the asterisk marker - a required argument's label carries `*`; an optional argument's and every option's does not
 
 ### Implementation for Phase 8
 
@@ -148,10 +148,10 @@ interactive questions".
 - [ ] T038 [US3] Integration test: a multi-field command is driven through the prompter end to end
 - [ ] T039 [P] Document the prompt key contract, the asterisk marker and the requiredness rule in `docs/v1/`
 
-### Cross-repository work — webware-usermanager (separate PR)
+### Cross-repository work: webware-usermanager (separate PR)
 
 - [ ] T040 [US3] Declare `user:init-db`'s `first-name`, `last-name`, `email` and `password` as `InputArgument::REQUIRED` and move its prompting into `interact()`, so the console can mark and validate them; `--role` keeps its `developer` default and `--drop` stays a flag
-- [ ] T041 [US3] Cover `interact()` — arguments filled when absent and left alone when supplied — and confirm `bin/webware user:init-db` still prompts when run with no arguments
+- [ ] T041 [US3] Cover `interact()` - arguments filled when absent and left alone when supplied - and confirm `bin/webware user:init-db` still prompts when run with no arguments
 
 ### Verification for Phase 8
 
@@ -188,7 +188,7 @@ interactive questions".
 ### MVP First (User Story 1)
 
 1. Phase 1 + Phase 2.
-2. Phase 3 (US1) — menu lists + navigates commands.
+2. Phase 3 (US1) - menu lists + navigates commands.
 3. STOP and validate: menu renders the command names.
 4. Ship/demo as MVP.
 
@@ -202,9 +202,9 @@ US1 → US2 (help) → US3 (run) → US4 (discovery) → Polish.
 - Generic CLI host with zero migration knowledge; webware-migration depends on this package (one-way: migration → console).
 - Discovery goes through the `ConsoleInterface::class` config key; `CommandLoaderFactory` merges `config['laminas-cli']['commands']` (mezzio-tooling's key) into a lazy `ContainerCommandLoader`.
 - The console presents/invokes commands; it does not reimplement command logic.
-- T029–T043 were appended 2026-09-25 for issue #31; no completed task (T001–T026) was rewritten.
+- T029 - T043 were appended 2026-09-25 for issue #31; no completed task (T001 - T026) was rewritten.
 - Requiredness is read from the command's own definition and is declarable on arguments only, so the
-  form marks required fields with `*` — see `plan.md`, "Design Decisions — command input machinery".
+  form marks required fields with `*` - see `plan.md`, "Design Decisions - command input machinery".
 - T040/T041 land in **webware-usermanager**, not this repository.
 - New and touched code uses `match` for conditional dispatch rather than chained `if` statements.
 - Commit after each task or group; squash-merge PRs to `1.0.x`.

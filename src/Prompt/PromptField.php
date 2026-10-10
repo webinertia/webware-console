@@ -29,7 +29,7 @@ final class PromptField
         }
     }
 
-    // @mago-expect lint:excessive-parameter-list — a field descriptor needs all six inputs.
+    // @mago-expect lint:excessive-parameter-list - a field descriptor needs all six inputs.
     public function __construct(
         public readonly string $name,
         public readonly string $description,

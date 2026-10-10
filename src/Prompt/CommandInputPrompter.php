@@ -29,7 +29,7 @@ use function sprintf;
  *
  * @internal
  */
-// @mago-expect lint:cyclomatic-complexity,kan-defect — a TUI prompt is inherently branchy.
+// @mago-expect lint:cyclomatic-complexity,kan-defect - a TUI prompt is inherently branchy.
 final readonly class CommandInputPrompter
 {
     private const int INPUT_ROW_HEIGHT = 1;
@@ -148,7 +148,7 @@ final readonly class CommandInputPrompter
     /**
      * The row between the last field and the key hints: the blank required
      * fields once a submission has been refused, otherwise the active field's
-     * description — which has to stay visible even when the field already holds
+     * description - which has to stay visible even when the field already holds
      * a value seeded from a declared default.
      */
     private static function status(PromptState $state): string
@@ -283,7 +283,7 @@ final readonly class CommandInputPrompter
         $state = new PromptState($fields);
 
         $this->console->run(
-            title : sprintf('%s — input', (string) $command->getName()),
+            title : sprintf('%s - input', (string) $command->getName()),
             state : $state,
             onKey : function (Event\Key $event, PromptState $state): void {
                 self::onKey($event, $state);

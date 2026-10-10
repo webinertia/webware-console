@@ -39,7 +39,7 @@ final class MenuCommand extends Command
     /**
      * @throws ConsoleExceptionInterface
      */
-    // @mago-expect lint:excessive-parameter-list — the menu command aggregates its view and run collaborators.
+    // @mago-expect lint:excessive-parameter-list - the menu command aggregates its view and run collaborators.
     public function __construct(
         private readonly ConsoleInterface $console,
         private readonly ContainerCommandLoader $loader,
