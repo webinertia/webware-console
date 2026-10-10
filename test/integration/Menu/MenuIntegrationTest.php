@@ -46,7 +46,7 @@ final class MenuIntegrationTest extends TestCase
                 [BarCommand::class, new BarCommand()],
             ]);
 
-        $loader = (new CommandLoaderFactory())($container);
+        $loader = new CommandLoaderFactory()($container);
 
         $frame = new Frame(
             Rect::fromSize(
