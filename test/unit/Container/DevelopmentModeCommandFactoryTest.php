@@ -44,7 +44,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
     #[Test]
     public function testBuildsTheCommand(): void
     {
-        $command = (new DevelopmentModeCommandFactory())($this->container([
+        $command = new DevelopmentModeCommandFactory()($this->container([
             'config_cache_path' => self::CACHE_FILE,
         ]));
 
@@ -54,7 +54,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
     #[Test]
     public function testPassesTheConfiguredCachePathToTheCommand(): void
     {
-        $command = (new DevelopmentModeCommandFactory())($this->container([
+        $command = new DevelopmentModeCommandFactory()($this->container([
             'config_cache_path' => self::CACHE_FILE,
         ]));
 
@@ -68,7 +68,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
     #[Test]
     public function testToleratesAConfigCachePathThatIsNotAString(): void
     {
-        $command = (new DevelopmentModeCommandFactory())(
+        $command = new DevelopmentModeCommandFactory()(
             $this->container(['config_cache_path' => 42]),
         );
 
@@ -85,7 +85,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
         // Deliberately offset-accessible: were the `is_array()` guard removed,
         // this would yield the cache path, the cache would be dropped, and the
         // assertion below would fail. That is what holds the guard in place.
-        $command = (new DevelopmentModeCommandFactory())($this->container(
+        $command = new DevelopmentModeCommandFactory()($this->container(
             config: new ArrayObject(['config_cache_path' => self::CACHE_FILE]),
         ));
 
@@ -99,7 +99,7 @@ final class DevelopmentModeCommandFactoryTest extends TestCase
     #[Test]
     public function testToleratesConfigWithoutACachePath(): void
     {
-        $command = (new DevelopmentModeCommandFactory())($this->container([]));
+        $command = new DevelopmentModeCommandFactory()($this->container([]));
 
         static::assertSame(
             Command::SUCCESS,

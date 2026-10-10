@@ -82,7 +82,7 @@ final class CommandLoaderFactoryTest extends TestCase
     {
         $container = $this->createStub(ContainerInterface::class);
 
-        $loader = (new CommandLoaderFactory())($container);
+        $loader = new CommandLoaderFactory()($container);
 
         static::assertSame([], $loader->getNames());
     }
@@ -133,6 +133,6 @@ final class CommandLoaderFactoryTest extends TestCase
                 [BarCommand::class, new BarCommand()],
             ]);
 
-        return (new CommandLoaderFactory())($container);
+        return new CommandLoaderFactory()($container);
     }
 }
