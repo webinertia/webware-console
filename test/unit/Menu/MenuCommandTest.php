@@ -364,7 +364,8 @@ final class MenuCommandTest extends TestCase
     {
         $container = $this->createStub(ContainerInterface::class);
         $container->method('has')->willReturn(true);
-        $container->method('get')
+        $container
+            ->method('get')
             ->willReturnCallback(
                 static function (string $id) use (&$fetchedClassNames): Command {
                     $fetchedClassNames[] = $id;

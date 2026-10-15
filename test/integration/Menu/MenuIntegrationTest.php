@@ -39,7 +39,8 @@ final class MenuIntegrationTest extends TestCase
         ];
 
         $container = $this->createStub(ContainerInterface::class);
-        $container->method('get')
+        $container
+            ->method('get')
             ->willReturnMap([
                 ['config', $config],
                 [FooCommand::class, new FooCommand()],
