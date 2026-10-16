@@ -47,13 +47,13 @@
         "console-menu": "php bin/webware menu",
         "menu": "php bin/webware menu",
         "mutation-test": "infection",
-        "test": "phpunit --testsuite unit",
+        "test": "phpunit --no-coverage --colors=always --testsuite \"unit test\"",
         "test-coverage": "phpunit --coverage-clover clover.xml",
         "test-all": [
             "@test",
             "@test-integration"
         ],
-        "test-integration": "phpunit --testsuite integration"
+        "test-integration": "phpunit --no-coverage --colors=always --testsuite \"integration test\""
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
