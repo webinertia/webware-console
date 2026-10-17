@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psl\Async;
+use Psl\DateTime;
 use Psl\IO;
 use Psl\Terminal;
 use Psl\Terminal\Event;
@@ -38,6 +39,7 @@ final class AppTest extends TestCase
                 width: 40,
                 height: 10,
                 title: $title,
+                tickInterval: DateTime\Duration::seconds(1),
             ),
         );
 
@@ -58,11 +60,11 @@ final class AppTest extends TestCase
                     $app->stop();
                 }
             },
-            render: static function (Frame $frame, stdClass $state) use (&$renders, $reader): void {
+            render: static function (Frame $frame, stdClass $state) use ($app, &$renders): void {
                 $renders++;
 
                 if ($renders >= 2) {
-                    $reader->close();
+                    $app->stop();
                 }
             },
         );
