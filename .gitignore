@@ -7,3 +7,17 @@
 /summary.log
 /data/cache/*
 !/data/cache/.gitkeep
+
+# Spec Kit preset copies are vendored released content: they ship inside
+# `webware/webware-tools/presets/` and are re-installed from there, so tracking
+# them here would duplicate the dependency rather than hold anything we own.
+# Ignored from the repo root because `.specify/.gitignore` is managed by
+# `specify` and is overwritten on every integration upgrade.
+/.specify/presets/
+
+# Machine-local extension state. The installed extensions themselves are
+# tracked under `.specify/extensions/`; only the catalog cache and compiled
+# Python bytecode are per-machine.
+/.specify/extensions/.cache/
+__pycache__/
+*.pyc
