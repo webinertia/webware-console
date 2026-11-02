@@ -23,13 +23,13 @@
         "laminas/laminas-config-aggregator": "^1.20",
         "laminas/laminas-servicemanager": "^4.5",
         "php": "~8.4.1 || ~8.5.0",
-        "php-standard-library/terminal": "^6.2",
+        "php-standard-library/terminal": "^6.4.2",
         "symfony/console": "^7.4 || ^8.0"
     },
     "require-dev": {
         "infection/infection": "^0.35",
-        "phpunit/phpunit": "^13.3",
-        "webware/webware-tools": "^1.0.0-rc.5"
+        "phpunit/phpunit": "^13.4.4",
+        "webware/webware-tools": "^1.0.0-rc.8"
     },
     "autoload": {
         "psr-4": {
@@ -47,13 +47,13 @@
         "console-menu": "php bin/webware menu",
         "menu": "php bin/webware menu",
         "mutation-test": "infection",
-        "test": "phpunit --testsuite unit",
+        "test": "phpunit --no-coverage --colors=always --testsuite \"unit test\"",
         "test-coverage": "phpunit --coverage-clover clover.xml",
         "test-all": [
             "@test",
             "@test-integration"
         ],
-        "test-integration": "phpunit --testsuite integration"
+        "test-integration": "phpunit --no-coverage --colors=always --testsuite \"integration test\""
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

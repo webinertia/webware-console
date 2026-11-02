@@ -126,7 +126,8 @@ final class CommandLoaderFactoryTest extends TestCase
     {
         $container = $this->createStub(ContainerInterface::class);
         $container->method('has')->willReturn(true);
-        $container->method('get')
+        $container
+            ->method('get')
             ->willReturnMap([
                 ['config', $config],
                 [FooCommand::class, new FooCommand()],
