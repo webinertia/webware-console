@@ -3,65 +3,71 @@
 
 declare(strict_types=1);
 
+use Laminas\ServiceManager\ServiceManager;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application;
 
 /**
- * Resolution order matters. `__DIR__` is symlink-resolved, so when this package is
- * installed from a `path` repository with `"symlink": true` the resolved path points at
- * the package's own checkout — not the consumer's `vendor/` — and the classic
- * `__DIR__ . '/../../../autoload.php'` probe misses. Prefer the autoloader Composer's bin
- * proxy hands us, which is always the consuming project's.
+ * Self-called anonymous function that creates its own scope and keeps the global namespace clean.
  */
-$composerAutoloadPath = $GLOBALS['_composer_autoload_path'] ?? null;
+(function (): void {
+    /**
+     * Resolution order matters. `__DIR__` is symlink-resolved, so when this package is
+     * installed from a `path` repository with `"symlink": true` the resolved path points at
+     * the package's own checkout, not the consumer's `vendor/`, and the classic
+     * `__DIR__ . '/../../../autoload.php'` probe misses. Prefer the autoloader Composer's bin
+     * proxy hands us, which is always the consuming project's.
+     */
+    $composerAutoloadPath = $GLOBALS['_composer_autoload_path'] ?? null;
 
-if (is_string($composerAutoloadPath)) {
-    // Invoked through vendor/bin: the consumer's autoloader, and therefore its
-    // config, is authoritative.
-    $autoload = $composerAutoloadPath;
-} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
-    // Installed into a consumer's vendor/ without the bin proxy.
-    $autoload = __DIR__ . '/../../../autoload.php';
-} else {
-    // Running from this repository's own checkout.
-    $autoload = __DIR__ . '/../vendor/autoload.php';
-}
+    if (is_string($composerAutoloadPath)) {
+        // Invoked through vendor/bin: the consumer's autoloader, and therefore its
+        // config, is authoritative.
+        $autoload = $composerAutoloadPath;
+    } elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+        // Installed into a consumer's vendor/ without the bin proxy.
+        $autoload = __DIR__ . '/../../../autoload.php';
+    } else {
+        // Running from this repository's own checkout.
+        $autoload = __DIR__ . '/../vendor/autoload.php';
+    }
 
-if (! file_exists($autoload)) {
-    fwrite(STDERR, 'Cannot locate the Composer autoloader; run "composer install" first.' . PHP_EOL);
+    if (! file_exists($autoload)) {
+        fwrite(STDERR, 'Cannot locate the Composer autoloader; run "composer install" first.' . PHP_EOL);
 
-    exit(1);
-}
+        exit(1);
+    }
 
-// Normalise before walking up. The bin proxy hands us "vendor/bin/../autoload.php", and
-// dirname() is purely textual — it would strip the ".." rather than resolve it.
-$autoload = realpath($autoload);
+    // Normalise before walking up. The bin proxy hands us "vendor/bin/../autoload.php", and
+    // dirname() is purely textual; it would strip the ".." rather than resolve it.
+    $autoload = realpath($autoload);
 
-if ($autoload === false) {
-    fwrite(STDERR, 'Cannot resolve the Composer autoloader path.' . PHP_EOL);
+    if ($autoload === false) {
+        fwrite(STDERR, 'Cannot resolve the Composer autoloader path.' . PHP_EOL);
 
-    exit(1);
-}
+        exit(1);
+    }
 
-require $autoload;
+    require $autoload;
 
-// <project>/vendor/autoload.php => <project>/
-$projectRoot = dirname($autoload, 2) . '/';
+    // <project>/vendor/autoload.php => <project>/
+    $projectRoot = dirname($autoload, 2) . '/';
 
-chdir($projectRoot);
+    chdir($projectRoot);
 
-$containerFile = $projectRoot . 'config/container.php';
+    $containerFile = $projectRoot . 'config/container.php';
 
-if (! file_exists($containerFile)) {
-    fwrite(STDERR, sprintf('Cannot locate the container at %s', $containerFile) . PHP_EOL);
+    if (! file_exists($containerFile)) {
+        fwrite(STDERR, sprintf('Cannot locate the container at %s', $containerFile) . PHP_EOL);
 
-    exit(1);
-}
+        exit(1);
+    }
 
-/** @var ContainerInterface $container */
-$container = require $containerFile;
+    /** @var ContainerInterface&ServiceManager $container */
+    $container = require $containerFile;
 
-/** @var Application $application */
-$application = $container->get(Application::class);
+    /** @var Application $application */
+    $application = $container->get(Application::class);
 
-exit($application->run());
+    exit($application->run());
+})();
