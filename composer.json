@@ -29,7 +29,7 @@
     "require-dev": {
         "infection/infection": "^0.35",
         "phpunit/phpunit": "^13.4.4",
-        "webware/webware-tools": "^1.0.0-rc.8"
+        "webware/webware-tools": "^1.0.0-rc.13"
     },
     "autoload": {
         "psr-4": {
