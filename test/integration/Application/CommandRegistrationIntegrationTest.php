@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Webware\Console\Test\Integration\Application;
 
-use Laminas\ConfigAggregator\ArrayProvider;
-use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ServiceManager\ConfigProvider as ServiceManagerConfigProvider;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -13,6 +11,8 @@ use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
+use Webware\ConfigManager\ConfigAggregator;
+use Webware\ConfigManager\Provider\ArrayProvider;
 use Webware\Console\ConfigProvider;
 use Webware\Console\ConsoleInterface;
 use Webware\Console\Container\AppFactory;

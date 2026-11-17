@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Laminas\ConfigAggregator\ArrayProvider;
-use Laminas\ConfigAggregator\ConfigAggregator;
-use Laminas\ConfigAggregator\PhpFileProvider;
 use Laminas\ServiceManager\ConfigProvider as ServiceManagerConfigProvider;
+use Webware\ConfigManager\ConfigAggregator;
+use Webware\ConfigManager\Provider\ArrayProvider;
+use Webware\ConfigManager\Provider\PhpFileProvider;
 use Webware\Console\ConfigProvider;
 
 // To enable or disable caching, set the `ConfigAggregator::ENABLE_CACHE` boolean in

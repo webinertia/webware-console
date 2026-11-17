@@ -4,30 +4,30 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce853b2e34ebcc8017b1d3477d3ea3f0",
+    "content-hash": "01573867fc62600fe3beece8683b9dce",
     "packages": [
         {
             "name": "brick/varexporter",
-            "version": "0.6.0",
+            "version": "0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/varexporter.git",
-                "reference": "af98bfc2b702a312abbcaff37656dbe419cec5bc"
+                "reference": "b3a50b8f630a9ed5015ea3e1f00479af261ed80d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/varexporter/zipball/af98bfc2b702a312abbcaff37656dbe419cec5bc",
-                "reference": "af98bfc2b702a312abbcaff37656dbe419cec5bc",
+                "url": "https://api.github.com/repos/brick/varexporter/zipball/b3a50b8f630a9ed5015ea3e1f00479af261ed80d",
+                "reference": "b3a50b8f630a9ed5015ea3e1f00479af261ed80d",
                 "shasum": ""
             },
             "require": {
                 "nikic/php-parser": "^5.0",
-                "php": "^8.1"
+                "php": "^8.2"
             },
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2.2",
-                "phpunit/phpunit": "^10.5",
-                "vimeo/psalm": "6.8.4"
+                "phpunit/phpunit": "^11.0",
+                "vimeo/psalm": "6.14.3"
             },
             "type": "library",
             "autoload": {
@@ -45,7 +45,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/varexporter/issues",
-                "source": "https://github.com/brick/varexporter/tree/0.6.0"
+                "source": "https://github.com/brick/varexporter/tree/0.7.0"
             },
             "funding": [
                 {
@@ -53,96 +53,27 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-20T17:42:39+00:00",
-            "published-time": "2025-02-20T17:52:38+00:00"
-        },
-        {
-            "name": "laminas/laminas-config-aggregator",
-            "version": "1.20.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laminas/laminas-config-aggregator.git",
-                "reference": "75331b17a9ba72c5fa8679988ef08a588ddd86af"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-config-aggregator/zipball/75331b17a9ba72c5fa8679988ef08a588ddd86af",
-                "reference": "75331b17a9ba72c5fa8679988ef08a588ddd86af",
-                "shasum": ""
-            },
-            "require": {
-                "brick/varexporter": "^0.5.0 || ^0.4.0 || ^0.6.0 || ^0.7.0",
-                "laminas/laminas-stdlib": "^3.18.0",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-                "webimpress/safe-writer": "^2.2.0"
-            },
-            "conflict": {
-                "nikic/php-parser": "<4.12",
-                "zendframework/zend-config-aggregator": "*"
-            },
-            "require-dev": {
-                "laminas/laminas-coding-standard": "~3.1.0",
-                "laminas/laminas-config": "^3.10.1",
-                "phpunit/phpunit": "^11.5.42",
-                "psalm/plugin-phpunit": "^0.19.5",
-                "vimeo/psalm": "^6.13.1"
-            },
-            "suggest": {
-                "laminas/laminas-config": "Allows loading configuration from XML, INI, YAML, and JSON files",
-                "laminas/laminas-config-aggregator-modulemanager": "Allows loading configuration from laminas-mvc Module classes",
-                "laminas/laminas-config-aggregator-parameters": "Allows usage of templated parameters within your configuration"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Laminas\\ConfigAggregator\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "Lightweight library for collecting and merging configuration from different sources",
-            "homepage": "https://laminas.dev",
-            "keywords": [
-                "config-aggregator",
-                "laminas"
-            ],
-            "support": {
-                "chat": "https://laminas.dev/chat",
-                "docs": "https://docs.laminas.dev/laminas-config-aggregator/",
-                "forum": "https://discourse.laminas.dev",
-                "issues": "https://github.com/laminas/laminas-config-aggregator/issues",
-                "rss": "https://github.com/laminas/laminas-config-aggregator/releases.atom",
-                "source": "https://github.com/laminas/laminas-config-aggregator"
-            },
-            "funding": [
-                {
-                    "url": "https://funding.communitybridge.org/projects/laminas-project",
-                    "type": "community_bridge"
-                }
-            ],
-            "time": "2026-06-01T15:37:55+00:00",
-            "published-time": "2026-06-01T15:38:51+00:00"
+            "time": "2026-01-06T22:56:00+00:00",
+            "published-time": "2026-01-06T22:57:30+00:00"
         },
         {
             "name": "laminas/laminas-servicemanager",
-            "version": "4.5.1",
+            "version": "4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-servicemanager.git",
-                "reference": "11192d588876ad04ba2988984c77b4ecb5c771c2"
+                "reference": "254f03b2d3ac201ba22e721ae75af6c1357e218d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-servicemanager/zipball/11192d588876ad04ba2988984c77b4ecb5c771c2",
-                "reference": "11192d588876ad04ba2988984c77b4ecb5c771c2",
+                "url": "https://api.github.com/repos/laminas/laminas-servicemanager/zipball/254f03b2d3ac201ba22e721ae75af6c1357e218d",
+                "reference": "254f03b2d3ac201ba22e721ae75af6c1357e218d",
                 "shasum": ""
             },
             "require": {
-                "brick/varexporter": "^0.3.8 || ^0.4.0 || ^0.5.0 || ^0.6.0",
+                "brick/varexporter": "^0.3.8 || ^0.4.0 || ^0.5.0 || ^0.6.0 || ^0.7.0",
                 "laminas/laminas-stdlib": "^3.19",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
                 "psr/container": "^1.1 || ^2.0"
             },
             "conflict": {
@@ -153,17 +84,19 @@
                 "psr/container-implementation": "^1.0 || ^2.0"
             },
             "require-dev": {
+                "boundwize/structarmed": "^0.18.11",
                 "composer/package-versions-deprecated": "^1.11.99.5",
-                "friendsofphp/proxy-manager-lts": "^1.0.18",
-                "laminas/laminas-cli": "^1.11",
+                "friendsofphp/proxy-manager-lts": "^1.0.19",
+                "laminas/internal-tooling": "^1.2",
+                "laminas/laminas-cli": "^1.16",
                 "laminas/laminas-coding-standard": "~3.1.0",
-                "laminas/laminas-container-config-test": "^1.1",
+                "laminas/laminas-container-config-test": "^1.2.0",
                 "mikey179/vfsstream": "^1.6.12",
-                "phpbench/phpbench": "^1.4.1",
-                "phpunit/phpunit": "^10.5.58",
-                "psalm/plugin-phpunit": "^0.19.5",
-                "symfony/console": "^6.4.17 || ^7.3.4",
-                "vimeo/psalm": "^6.13.1"
+                "phpbench/phpbench": "^1.7.0",
+                "phpunit/phpunit": "^11.5.58",
+                "psalm/plugin-phpunit": "^0.19.7",
+                "symfony/console": "^6.4.17 || ^7.4.23",
+                "vimeo/psalm": "^6.20.11"
             },
             "suggest": {
                 "friendsofphp/proxy-manager-lts": "To handle lazy initialization of services",
@@ -200,16 +133,16 @@
                 "chat": "https://laminas.dev/chat",
                 "forum": "https://discourse.laminas.dev",
                 "issues": "https://github.com/laminas/laminas-servicemanager/issues",
-                "source": "https://github.com/laminas/laminas-servicemanager/tree/4.5.1"
+                "source": "https://github.com/laminas/laminas-servicemanager/tree/4.6.0"
             },
             "funding": [
                 {
-                    "url": "https://funding.communitybridge.org/projects/laminas-project",
-                    "type": "community_bridge"
+                    "url": "https://crowdfunding.linuxfoundation.org/initiatives/laminas-project",
+                    "type": "custom"
                 }
             ],
-            "time": "2026-05-12T09:53:32+00:00",
-            "published-time": "2026-05-12T09:57:04+00:00"
+            "time": "2026-11-13T17:18:02+00:00",
+            "published-time": "2026-11-13T17:19:21+00:00"
         },
         {
             "name": "laminas/laminas-stdlib",
@@ -539,6 +472,73 @@
             "published-time": "2026-10-28T15:57:51+00:00"
         },
         {
+            "name": "php-standard-library/collection",
+            "version": "6.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-standard-library/collection.git",
+                "reference": "65d8f2e487696c55757f6883f05494091681c330"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-standard-library/collection/zipball/65d8f2e487696c55757f6883f05494091681c330",
+                "reference": "65d8f2e487696c55757f6883f05494091681c330",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.4.0 || ~8.5.0 || ~8.6.0",
+                "php-standard-library/default": "^6.0",
+                "php-standard-library/foundation": "^6.0"
+            },
+            "conflict": {
+                "azjezz/psl": "*"
+            },
+            "require-dev": {
+                "php-standard-library/str": "^6.0",
+                "php-standard-library/vec": "^6.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-next": "6.4.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psl\\Collection\\": "src/Psl/Collection/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Seifeddine Gmati",
+                    "email": "azjezz@carthage.software"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/php-standard-library/php-standard-library/graphs/contributors"
+                }
+            ],
+            "description": "Generic, object-oriented Vector, Map, and Set collections with immutable and mutable variants",
+            "homepage": "https://php-standard-library.dev",
+            "keywords": [
+                "collection",
+                "generics",
+                "map",
+                "set",
+                "vector"
+            ],
+            "support": {
+                "source": "https://github.com/php-standard-library/collection/tree/6.4.2"
+            },
+            "time": "2026-10-27T23:29:50+00:00",
+            "published-time": "2026-10-28T15:57:50+00:00"
+        },
+        {
             "name": "php-standard-library/comparison",
             "version": "6.4.2",
             "source": {
@@ -806,6 +806,148 @@
             },
             "time": "2026-10-27T23:29:50+00:00",
             "published-time": "2026-10-28T15:57:51+00:00"
+        },
+        {
+            "name": "php-standard-library/file",
+            "version": "6.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-standard-library/file.git",
+                "reference": "a2f3b8030ccfb325b6fa5da3521034b7fca4a2c9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-standard-library/file/zipball/a2f3b8030ccfb325b6fa5da3521034b7fca4a2c9",
+                "reference": "a2f3b8030ccfb325b6fa5da3521034b7fca4a2c9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.4.0 || ~8.5.0 || ~8.6.0",
+                "php-standard-library/async": "^6.4",
+                "php-standard-library/date-time": "^6.4",
+                "php-standard-library/foundation": "^6.0",
+                "php-standard-library/io": "^6.4"
+            },
+            "conflict": {
+                "azjezz/psl": "*"
+            },
+            "require-dev": {
+                "php-standard-library/env": "^6.0",
+                "php-standard-library/filesystem": "^6.0",
+                "php-standard-library/os": "^6.0",
+                "php-standard-library/str": "^6.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-next": "6.4.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Psl/bootstrap.php"
+                ],
+                "psr-4": {
+                    "Psl\\File\\": "src/Psl/File/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Seifeddine Gmati",
+                    "email": "azjezz@carthage.software"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/php-standard-library/php-standard-library/graphs/contributors"
+                }
+            ],
+            "description": "Typed file handles for reading and writing with write modes and advisory locking",
+            "homepage": "https://php-standard-library.dev",
+            "keywords": [
+                "file",
+                "handle",
+                "io"
+            ],
+            "support": {
+                "source": "https://github.com/php-standard-library/file/tree/6.4.2"
+            },
+            "time": "2026-10-27T23:29:50+00:00",
+            "published-time": "2026-10-28T15:57:51+00:00"
+        },
+        {
+            "name": "php-standard-library/filesystem",
+            "version": "6.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-standard-library/filesystem.git",
+                "reference": "4194f7acb105cf1dd836458a7fa5a72f28fe0e15"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-standard-library/filesystem/zipball/4194f7acb105cf1dd836458a7fa5a72f28fe0e15",
+                "reference": "4194f7acb105cf1dd836458a7fa5a72f28fe0e15",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.4.0 || ~8.5.0 || ~8.6.0",
+                "php-standard-library/foundation": "^6.0"
+            },
+            "conflict": {
+                "azjezz/psl": "*"
+            },
+            "require-dev": {
+                "php-standard-library/env": "^6.0",
+                "php-standard-library/file": "^6.0",
+                "php-standard-library/os": "^6.0",
+                "php-standard-library/str": "^6.0",
+                "php-standard-library/type": "^6.0",
+                "php-standard-library/vec": "^6.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-next": "6.4.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Psl/bootstrap.php"
+                ],
+                "psr-4": {
+                    "Psl\\Filesystem\\": "src/Psl/Filesystem/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Seifeddine Gmati",
+                    "email": "azjezz@carthage.software"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/php-standard-library/php-standard-library/graphs/contributors"
+                }
+            ],
+            "description": "Type-safe functions for file system operations with proper exception handling",
+            "homepage": "https://php-standard-library.dev",
+            "keywords": [
+                "file-system",
+                "filesystem"
+            ],
+            "support": {
+                "source": "https://github.com/php-standard-library/filesystem/tree/6.4.2"
+            },
+            "time": "2026-10-27T23:29:50+00:00",
+            "published-time": "2026-10-28T15:57:50+00:00"
         },
         {
             "name": "php-standard-library/foundation",
@@ -1746,6 +1888,81 @@
             "published-time": "2026-10-28T15:57:49+00:00"
         },
         {
+            "name": "php-standard-library/type",
+            "version": "6.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-standard-library/type.git",
+                "reference": "fde796f5c981865a6235c42dd15e9402b79f172d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-standard-library/type/zipball/fde796f5c981865a6235c42dd15e9402b79f172d",
+                "reference": "fde796f5c981865a6235c42dd15e9402b79f172d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "~8.4.0 || ~8.5.0 || ~8.6.0",
+                "php-standard-library/collection": "^6.4",
+                "php-standard-library/foundation": "^6.0",
+                "php-standard-library/iter": "^6.4"
+            },
+            "conflict": {
+                "azjezz/psl": "*"
+            },
+            "require-dev": {
+                "ext-bcmath": "*",
+                "php-standard-library/dict": "^6.0",
+                "php-standard-library/math": "^6.0",
+                "php-standard-library/result": "^6.0",
+                "php-standard-library/str": "^6.0",
+                "php-standard-library/vec": "^6.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-next": "6.4.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Psl/bootstrap.php"
+                ],
+                "psr-4": {
+                    "Psl\\Type\\": "src/Psl/Type/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Seifeddine Gmati",
+                    "email": "azjezz@carthage.software"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/php-standard-library/php-standard-library/graphs/contributors"
+                }
+            ],
+            "description": "Runtime type validation implementing Parse, Don't Validate - coerce and assert unstructured input into well-typed data",
+            "homepage": "https://php-standard-library.dev",
+            "keywords": [
+                "coercion",
+                "type",
+                "type-safety",
+                "validation"
+            ],
+            "support": {
+                "source": "https://github.com/php-standard-library/type/tree/6.4.2"
+            },
+            "time": "2026-10-27T23:29:50+00:00",
+            "published-time": "2026-10-28T15:57:52+00:00"
+        },
+        {
             "name": "psr/container",
             "version": "2.0.2",
             "source": {
@@ -2645,64 +2862,140 @@
             "published-time": "2026-10-28T18:24:27+00:00"
         },
         {
-            "name": "webimpress/safe-writer",
-            "version": "2.2.0",
+            "name": "webware/webware-configmanager",
+            "version": "1.0.0-alpha.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webimpress/safe-writer.git",
-                "reference": "9d37cc8bee20f7cb2f58f6e23e05097eab5072e6"
+                "url": "https://github.com/webinertia/webware-configmanager.git",
+                "reference": "366524ca8223aa1403a11d5341f042d7da43d4b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webimpress/safe-writer/zipball/9d37cc8bee20f7cb2f58f6e23e05097eab5072e6",
-                "reference": "9d37cc8bee20f7cb2f58f6e23e05097eab5072e6",
+                "url": "https://api.github.com/repos/webinertia/webware-configmanager/zipball/366524ca8223aa1403a11d5341f042d7da43d4b9",
+                "reference": "366524ca8223aa1403a11d5341f042d7da43d4b9",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3 || ^8.0"
+                "brick/varexporter": "^0.7.0",
+                "ext-json": "*",
+                "php": "~8.4.1 || ~8.5.0",
+                "php-standard-library/type": "^6.4.2",
+                "psr/container": "^2.0",
+                "webware/webware-filewriter": "^1.0.0-alpha.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^9.5.4",
-                "vimeo/psalm": "^4.7",
-                "webimpress/coding-standard": "^1.2.2"
+                "infection/infection": "^0.35.0",
+                "laminas/laminas-config-aggregator": "1.21",
+                "laminas/laminas-filter": "^3.5",
+                "laminas/laminas-i18n": "^3.1",
+                "laminas/laminas-servicemanager": "^4.6",
+                "phpbench/phpbench": "^1.7",
+                "phpunit/phpunit": "^13.3.0",
+                "roave/backward-compatibility-check": "^8.21.0",
+                "roave/security-advisories": "dev-master",
+                "symfony/yaml": "^7.4 || ^8.0",
+                "webware/webware-tools": "1.0.0-rc.15"
+            },
+            "suggest": {
+                "laminas/laminas-filter": "Install to use the Filter processor",
+                "laminas/laminas-i18n": "Install to use the Translator processor",
+                "laminas/laminas-servicemanager": "Install if you need an extensible plugin manager for use with the Config Factory"
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "2.2.x-dev",
-                    "dev-develop": "2.3.x-dev",
-                    "dev-release-1.0": "1.0.x-dev"
+                "laminas": {
+                    "component": "Webware\\ConfigManager",
+                    "config-provider": "Webware\\ConfigManager\\ConfigProvider"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Webimpress\\SafeWriter\\": "src/"
+                    "Webware\\ConfigManager\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-2-Clause"
+                "BSD-3-Clause"
             ],
-            "description": "Tool to write files safely, to avoid race conditions",
-            "keywords": [
-                "concurrent write",
-                "file writer",
-                "race condition",
-                "safe writer",
-                "webimpress"
-            ],
-            "support": {
-                "issues": "https://github.com/webimpress/safe-writer/issues",
-                "source": "https://github.com/webimpress/safe-writer/tree/2.2.0"
-            },
-            "funding": [
+            "authors": [
                 {
-                    "url": "https://github.com/michalbundyra",
-                    "type": "github"
+                    "name": "Joey Smith",
+                    "email": "jsmith@webinertia.net",
+                    "role": "Developer"
                 }
             ],
-            "time": "2021-04-19T16:34:45+00:00",
-            "published-time": "2021-04-19T16:39:08+00:00"
+            "description": "Nested object property based access to configuration data, with pluggable readers, writers and processors.",
+            "homepage": "https://github.com/orgs/webinertia/discussions",
+            "keywords": [
+                "config",
+                "configuration",
+                "webware"
+            ],
+            "support": {
+                "chat": "https://discord.gg/9TxQ74EPsG",
+                "issues": "https://github.com/webinertia/webware-configmanager/issues",
+                "source": "https://github.com/webinertia/webware-configmanager/tree/1.0.0-alpha.4"
+            },
+            "time": "2026-11-16T14:39:08+00:00",
+            "published-time": "2026-11-16T14:40:22+00:00"
+        },
+        {
+            "name": "webware/webware-filewriter",
+            "version": "1.0.0-alpha.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webinertia/webware-filewriter.git",
+                "reference": "7ce846349659c7ab8c4b2802db87c90460891e76"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webinertia/webware-filewriter/zipball/7ce846349659c7ab8c4b2802db87c90460891e76",
+                "reference": "7ce846349659c7ab8c4b2802db87c90460891e76",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.4.1 || ~8.5.0",
+                "php-standard-library/file": "^6.4.2",
+                "php-standard-library/filesystem": "^6.4.2"
+            },
+            "require-dev": {
+                "infection/infection": "^0.35.0",
+                "phpbench/phpbench": "^1.7",
+                "phpunit/phpunit": "^13.4.4",
+                "roave/backward-compatibility-check": "^8.21.0",
+                "roave/security-advisories": "dev-master",
+                "webware/webware-tools": "^1.0.0-rc.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Webware\\FileWriter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Joey Smith",
+                    "email": "jsmith@webinertia.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Atomic file writer and directory-tree writer for the Webware ecosystem",
+            "keywords": [
+                "atomic",
+                "file",
+                "webware",
+                "writer"
+            ],
+            "support": {
+                "issues": "https://github.com/webinertia/webware-filewriter/issues",
+                "source": "https://github.com/webinertia/webware-filewriter/tree/1.0.0-alpha.2"
+            },
+            "time": "2026-11-16T01:58:32+00:00",
+            "published-time": "2026-11-16T02:01:26+00:00"
         }
     ],
     "packages-dev": [
