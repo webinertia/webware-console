@@ -23,9 +23,9 @@
 
 declare(strict_types=1);
 
-use Laminas\ConfigAggregator\ConfigAggregator;
+use Webware\ConfigManager\Cache\ConfigCache;
 
 return [
-    ConfigAggregator::ENABLE_CACHE => false,
-    'debug'                        => true,
+    ConfigCache::ENABLE_CACHE => false,
+    'debug'                   => true,
 ];
