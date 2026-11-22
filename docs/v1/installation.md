@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- PHP 8.4.1+ (`~8.4.1 || ~8.5.0`)
+- PHP 8.4.1+ (`~8.4.1 || ~8.5.0 || ~8.6.0`)
 - Composer
 
 ## Consumer applications
