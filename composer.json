@@ -21,7 +21,7 @@
     ],
     "require": {
         "laminas/laminas-servicemanager": "^4.5",
-        "php": "~8.4.1 || ~8.5.0",
+        "php": "~8.4.1 || ~8.5.0 || ~8.6.0",
         "php-standard-library/terminal": "^6.4.2",
         "symfony/console": "^7.4 || ^8.0",
         "webware/webware-configmanager": "^1.0.0-alpha.4"
