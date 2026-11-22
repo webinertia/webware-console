@@ -5,7 +5,7 @@ The runtime is Mezzio-style: `laminas-config-aggregator` merges configuration an
 
 ## Layout
 
-```
+```text
 config/
   config.php                        # ConfigAggregator over providers + autoload dir + cache
   container.php                     # ServiceManager build

@@ -100,12 +100,12 @@ final class DevelopmentModeCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         return match (true) {
-            true === $input->getOption('enable') => $this->enable($output),
-            true === $input->getOption('disable') => $this->disable($output),
-            true === $input->getOption('status') => $this->status($output),
-            true === $input->getOption('clear-cache') => $this->clearCache($output),
+            true === $input->getOption('enable')        => $this->enable($output),
+            true === $input->getOption('disable')       => $this->disable($output),
+            true === $input->getOption('status')        => $this->status($output),
+            true === $input->getOption('clear-cache')   => $this->clearCache($output),
             true === $input->getOption('auto-composer') => $this->autoComposer($output),
-            default => $this->usage($output),
+            default                                     => $this->usage($output),
         };
     }
 
