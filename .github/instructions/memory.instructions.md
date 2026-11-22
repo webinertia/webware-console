@@ -103,7 +103,7 @@ Tagline: Generic CLI host - owns the Symfony runtime + lazy command discovery, s
   known set of cases (key handling, status/state selection, mode dispatch) is written as a `match`
   expression. Precedent: `CommandInputPrompter::onKey()`.
 - mago lint is the backstop; rules docs (reference for "what to prefer"):
-  https://mago.carthage.software/latest/en/tools/linter/rules/
+  <https://mago.carthage.software/latest/en/tools/linter/rules/>
 - Greenfield: **no mago baselines**: resolve every lint/analyze/guard finding at source.
 - PHPUnit 13: `#[CoversClass]` + `#[CoversMethod]` per class, `createStub()` for value doubles,
   `createMock()` only with `expects()`, `static::assert*`.

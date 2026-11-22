@@ -88,7 +88,7 @@ final readonly class CommandInputPrompter
             );
 
             match ($field->kind) {
-                FieldKind::Flag => $buffer->setString(
+                FieldKind::Flag                        => $buffer->setString(
                     x    : $inputArea->x,
                     y    : $y,
                     text : $field->flagValue ? '[x]' : '[ ]',
